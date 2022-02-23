@@ -12,7 +12,9 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
-	localstorage "github.com/hwameistor/local-storage/pkg/podschedulerplugin"
+	localstorage "github.com/hwameistor/local-storage/pkg/scheduler"
+	"github.com/hwameiStor/local-storage/pkg/scheduler"
+
 )
 
 var BUILDVERSION, BUILDTIME, GOVERSION string
@@ -29,7 +31,7 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	command := app.NewSchedulerCommand(
-		app.WithPlugin(localstorage.Name, localstorage.New),
+		app.WithPlugin(scheduler.Name, scheduler.New),
 	)
 
 	if err := command.Execute(); err != nil {
