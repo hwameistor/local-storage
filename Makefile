@@ -1,4 +1,4 @@
-DOCKER_REGISTRY ?= 10.6.170.180/localstorage
+DOCKER_REGISTRY ?= hwameistor.io/hwameistor
 RELEASE_DOCKER_REGISTRY ?= hwameistor.io/hwameistor
 
 GO_VERSION = $(shell go version)
@@ -19,9 +19,8 @@ OPERATOR_CMD = operator-sdk
 RUN_CMD = go run
 K8S_CMD = kubectl
 
-BUILDER_NAME = ${DOCKER_REGISTRY}/local-storage-builder
-BUILDER_TAG = v0.1
-#BUILDER_MOUNT_SRC_DIR = ${PROJECT_SOURCE_MOUNT_DIR}/../
+BUILDER_NAME = hwameistor/builder
+BUILDER_TAG = latest
 BUILDER_MOUNT_SRC_DIR = ${PROJECT_SOURCE_CODE_DIR}/../
 BUILDER_MOUNT_DST_DIR = /go/src/github.com/DaoCloud
 BUILDER_WORKDIR = /go/src/github.com/hwameistor/local-storage
@@ -47,7 +46,7 @@ include ./makefiles/disk-checker.mk
 .PHONY: builder
 builder:
 	docker build -t ${BUILDER_NAME}:${BUILDER_TAG} -f images/builder/Dockerfile .
-	#docker push ${BUILDER_NAME}:${BUILDER_TAG}
+	docker push ${BUILDER_NAME}:${BUILDER_TAG}
 
 .PHONY: debug
 debug:
@@ -93,4 +92,4 @@ unit-test:
 all: gen-code member_image gen-client scheduler_image alerter_image disk_checker_image
 
 .PHONY: release
-release: member_release scheduler_release alerter_release disk_checker_release
+release: member_release
