@@ -43,14 +43,14 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 	logCtx := m.logger.WithFields(log.Fields{"LocalDisk": localDiskNameSpacedName})
 	logCtx.Debug("Working on a LocalDisk task")
 	splitRes := strings.Split(localDiskNameSpacedName, "/")
-	var nameSpace, diskName string
+	var diskName string
 	if len(splitRes) >= 2 {
-		nameSpace = splitRes[0]
+		// nameSpace = splitRes[0]
 		diskName = splitRes[1]
 	}
 
 	localDisk := &ldmv1alpha1.LocalDisk{}
-	if err := m.apiClient.Get(context.TODO(), types.NamespacedName{Namespace: nameSpace, Name: diskName}, localDisk); err != nil {
+	if err := m.apiClient.Get(context.TODO(), types.NamespacedName{Name: diskName}, localDisk); err != nil {
 		if !errors.IsNotFound(err) {
 			logCtx.WithError(err).Error("Failed to get LocalDisk from cache, retry it later ...")
 			return err
