@@ -2,7 +2,7 @@
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5685/badge)](https://bestpractices.coreinfrastructure.org/projects/5685)
 
-English | [Simplified_Chinese](https://github.com/Angel0507/local-storage/blob/main/README_zh.md)
+English | [Simplified_Chinese](https://github.com/hwameistor/local-storage/blob/main/README_zh.md)
 
 ## Introduction
 
