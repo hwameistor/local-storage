@@ -14,7 +14,6 @@ Support disk type: `HDD`, `SSD`, `NVMe`, `RAMDisk`.
 
 ![image](https://github.com/hwameistor/local-storage/blob/main/HwameiStor-arch.png)
 
-
 ## Features and Roadmap
 
 |        Feature       |   Status      |  Release  |   TP Date  |    GA Date   |                Description               |
