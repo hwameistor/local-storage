@@ -45,7 +45,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: scheduler
-          image: 10.6.170.180/localstorage/local-storage-scheduler:1.0-integrate_ldm_v1
+          image: hwameistor/scheduler:v0.0.1
           imagePullPolicy: Always
           args:
             - --config=/etc/kubernetes/scheduler-config.yaml
