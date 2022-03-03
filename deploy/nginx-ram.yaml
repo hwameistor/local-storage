@@ -19,7 +19,7 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 0
       containers:
-      - image: ghcr.io/hwameistor/nginx:latest
+      - image: nginx:latest
         imagePullPolicy: IfNotPresent
         name: nginx
         ports:
