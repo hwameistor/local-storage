@@ -39,7 +39,7 @@ debug:
 
 .PHONY: builder
 builder:
-	docker build -t ${BUILDER_NAME}:${BUILDER_TAG} -f build/builder.Dockerfile .
+	docker build -t ${BUILDER_NAME}:${BUILDER_TAG} -f build/builder/Dockerfile ${PROJECT_SOURCE_CODE_DIR}
 
 .PHONY: compile
 compile:
