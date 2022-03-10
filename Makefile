@@ -28,7 +28,7 @@ MODULE_NAME = local-storage
 
 IMAGE_NAME = ${IMAGE_REGISTRY}/${MODULE_NAME}
 BUILDER_NAME = ${IMAGE_REGISTRY}/${MODULE_NAME}-builder
-BUILDER_TAG = v1.0.0
+BUILDER_TAG = latest
 BUILDER_MOUNT_DST_DIR = /go/src/github.com/hwameistor/${MODULE_NAME}
 BUILD_BIN = ${BINS_DIR}/${MODULE_NAME}
 BUILD_MAIN = ${CMDS_DIR}/manager/main.go
@@ -39,7 +39,7 @@ debug:
 
 .PHONY: builder
 builder:
-	docker build -t ${BUILDER_NAME}:${BUILDER_TAG} -f builder.Dockerfile .
+	docker build -t ${BUILDER_NAME}:${BUILDER_TAG} -f build/builder.Dockerfile .
 
 .PHONY: compile
 compile:
@@ -52,7 +52,7 @@ compile_arm64:
 .PHONY: image
 image:
 	${DOCKER_MAKE_CMD} make compile
-	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile ${PROJECT_SOURCE_CODE_DIR}
+	docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f build/Dockerfile ${PROJECT_SOURCE_CODE_DIR}
 
 .PHONY: release
 release:
@@ -88,4 +88,4 @@ clean:
 	docker rmi -f $(shell docker images -f dangling=true -qa)
 
 unit-test:
-	bash shell/unit-test.sh
+	bash test/unit-test.sh
