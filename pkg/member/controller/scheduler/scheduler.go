@@ -16,6 +16,7 @@ import (
 // 		need so much more thinking!!!
 
 // Scheduler interface
+//go:generate mockgen -source=scheduler.go -destination=../../../mocks/scheduler.go  -package=mocks
 type Scheduler interface {
 	Init()
 	// schedule will schedule all replicas, and generate a valid VolumeConfig

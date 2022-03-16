@@ -16,14 +16,14 @@ var _ = ginkgo.Describe("volume", func() {
 	client := f.GetClient()
 
 	ginkgo.It("Configure the base environment", func() {
-		installHelm()
+		installHwameiStorByHelm()
 		addLabels()
 	})
 	ginkgo.Context("test localstorage", func() {
 		ginkgo.It("check status", func() {
 			daemonset := &appsv1.DaemonSet{}
 			daemonsetKey := k8sclient.ObjectKey{
-				Name:      "hwameistor",
+				Name:      "hwameistor-local-storage",
 				Namespace: "hwameistor",
 			}
 
