@@ -21,11 +21,7 @@ localstorage-10-6-161-25   Ready    <none>            10d   v1.18.6
 localstorage-10-6-161-26   Ready    <none>            10d   v1.18.6
 localstorage-10-6-161-27   Ready    <none>            10d   v1.18.6
 
-# 2. Add local-storage config for each selected node as an annotation, key is "localstorage.hwameistor.io/local-storage-conf", default volumeKind is LVM
-$ kubectl annotate node localstorage-10-6-161-27 localstorage.hwameistor.io/local-storage-conf='{"storage":{"volumeKind": "LVM", "ramdiskTotalCapacity": "1GB"}}'
-node/localstorage-10-6-161-27 annotated
-
-# 3. Add local-storage label for each selected node, key is "lvm.hwameistor.io/enable"
+# 2. Add local-storage label for each selected node, key is "lvm.hwameistor.io/enable"
 $ kubectl label node localstorage-10-6-161-27 lvm.hwameistor.io/enable=true
 node/localstorage-10-6-161-27 labeled
 
