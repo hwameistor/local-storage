@@ -18,6 +18,7 @@ var (
 )
 
 // LocalPoolManager is an interface to manage local storage pools
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_pool_manager.go  -package=mocks
 type LocalPoolManager interface {
 	ExtendPools(localDisks []*apisv1alpha1.LocalDisk) error
 
@@ -27,6 +28,7 @@ type LocalPoolManager interface {
 }
 
 // LocalVolumeReplicaManager interface
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_volume_replica_manager.go  -package=mocks
 type LocalVolumeReplicaManager interface {
 	CreateVolumeReplica(replica *apisv1alpha1.LocalVolumeReplica) (*apisv1alpha1.LocalVolumeReplica, error)
 	DeleteVolumeReplica(replica *apisv1alpha1.LocalVolumeReplica) error
@@ -40,6 +42,7 @@ type LocalVolumeReplicaManager interface {
 }
 
 // LocalDiskManager is an interface to manage local disks
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_disk_manager.go  -package=mocks
 type LocalDiskManager interface {
 	// Discover all disks including HDD, SSD, NVMe, etc..
 	DiscoverAvailableDisks() ([]*apisv1alpha1.LocalDisk, error)
@@ -47,6 +50,7 @@ type LocalDiskManager interface {
 }
 
 // LocalRegistry interface
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_registry.go  -package=mocks
 type LocalRegistry interface {
 	Init()
 
@@ -70,11 +74,13 @@ type DeviceInfo struct {
 }
 
 // LocalDeviceListInterface interface
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_device_list_interface.go  -package=mocks
 type LocalDeviceListInterface interface {
 	GetDevicesInfo(string, map[string]struct{}) map[string]*DeviceInfo
 }
 
 // LocalVolumeExecutor interface
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_volume_executor.go  -package=mocks
 type LocalVolumeExecutor interface {
 	CreateVolumeReplica(replica *apisv1alpha1.LocalVolumeReplica) (*apisv1alpha1.LocalVolumeReplica, error)
 	DeleteVolumeReplica(replica *apisv1alpha1.LocalVolumeReplica) error
@@ -89,6 +95,7 @@ type LocalVolumeExecutor interface {
 }
 
 // LocalPoolExecutor interface
+//go:generate mockgen -source=types.go -destination=../../../mocks/local_pool_executor.go  -package=mocks
 type LocalPoolExecutor interface {
 	ExtendPools(localDisks []*apisv1alpha1.LocalDisk) error
 	ExtendPoolsInfo(localDisks map[string]*apisv1alpha1.LocalDisk) (map[string]*apisv1alpha1.LocalPool, error)

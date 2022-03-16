@@ -80,7 +80,7 @@ apis:
 .PHONY: vendor
 vendor:
 	go mod tidy -compat=1.17
-	go mod vendor 
+	go mod vendor
 
 .PHONY: clean
 clean:
@@ -91,3 +91,7 @@ clean:
 
 unit-test:
 	bash test/unit-test.sh
+
+.PHONY: generate
+generate:
+	${DOCKER_MAKE_CMD} bash test/mock-generate.sh pkg

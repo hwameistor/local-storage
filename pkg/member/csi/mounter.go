@@ -13,6 +13,7 @@ import (
 )
 
 // Mounter interface
+//go:generate mockgen -source=mounter.go -destination=../../mocks/mounter.go  -package=mocks
 type Mounter interface {
 	MountRawBlock(devPath string, mountpoint string) error
 	BindMount(devPath string, mountpoint string) error
