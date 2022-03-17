@@ -82,7 +82,7 @@ func addLabels() {
 		}
 
 	}
-	time.Sleep(3 * time.Minute)
+	time.Sleep(1 * time.Minute)
 }
 
 func installHwameiStorByHelm() {
