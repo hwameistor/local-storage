@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-var _ = ginkgo.Describe("test localstorage Ha volume", func() {
+var _ = ginkgo.Describe("[e2e]test localstorage Ha volume", func() {
 
 	f := framework.NewDefaultFramework(lsv1.AddToScheme)
 	client := f.GetClient()
