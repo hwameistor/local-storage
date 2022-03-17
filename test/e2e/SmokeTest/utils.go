@@ -88,7 +88,7 @@ func installHwameiStorByHelm() {
 	logrus.Infof("helm install hwameistor")
 	_ = runInLinux("cd ../helm-charts/charts && helm install hwameistor -n hwameistor --create-namespace --generate-name")
 	logrus.Infof("waiting for intall hwameistor")
-	time.Sleep(1 * time.Minute)
+	time.Sleep(3 * time.Minute)
 }
 func uninstallHelm() {
 	logrus.Printf("helm uninstall hwameistor")
