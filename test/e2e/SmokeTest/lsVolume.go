@@ -161,7 +161,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-			time.Sleep(1 * time.Minute)
+			time.Sleep(2 * time.Minute)
 			pvc := &apiv1.PersistentVolumeClaim{}
 			pvcKey := k8sclient.ObjectKey{
 				Name:      "pvc-lvm",
