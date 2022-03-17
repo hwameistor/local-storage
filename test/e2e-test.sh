@@ -8,7 +8,7 @@ export GOVC_URL="https://192.168.1.136:443"
 export GOVC_DATACENTER="DaoCloud-NDX-Fusion"
 export GOVC_RESOURCE_POOL="e2e"
 export hosts="fupan-e2e-k8s-master fupan-e2e-k8s-node1 fupan-e2e-k8s-node2"
-export snapshot="ready to ginkgo"
+export snapshot="e2etest"
 # for h in hosts; do govc vm.power -off -force $h; done
 # for h in hosts; do govc snapshot.revert -vm $h "机器配置2"; done
 # for h in hosts; do govc vm.power -on -force $h; done
