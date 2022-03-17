@@ -30,7 +30,6 @@ var _ = ginkgo.Describe("test  localstorage volume", ginkgo.Label("useless"), fu
 			err := client.Get(context.TODO(), daemonsetKey, daemonset)
 			if err != nil {
 				f.ExpectNoError(err)
-
 			}
 
 			gomega.Expect(daemonset.Status.DesiredNumberScheduled).To(gomega.Equal(daemonset.Status.NumberAvailable))
