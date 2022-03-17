@@ -70,7 +70,7 @@ func addLabels() {
 			f.ExpectNoError(err)
 		}
 
-		if _, exists := node.Labels["csi.driver.hwameistor.io/local-storage"]; !exists {
+		if _, exists := node.Labels["lvm.hwameistor.io/enable"]; !exists {
 			node.Labels["lvm.hwameistor.io/enable"] = "true"
 			logrus.Printf("adding labels ")
 			err := client.Update(context.TODO(), node)
