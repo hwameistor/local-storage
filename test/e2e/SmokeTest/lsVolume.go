@@ -193,7 +193,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Infof("Components are ready ")
 				result = true
 			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout:")
+				logrus.Error("timeout")
 				result = false
 
 			}
@@ -210,7 +210,31 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-			gomega.Expect(deployment.Status.AvailableReplicas).To(gomega.Equal(int32(1)))
+			logrus.Infof("waiting for the deployment to be ready ")
+			ch := make(chan struct{}, 1)
+			var result bool
+			go func() {
+				for deployment.Status.AvailableReplicas != int32(1) {
+					time.Sleep(10 * time.Second)
+					err := client.Get(ctx, deployKey, deployment)
+					if err != nil {
+						logrus.Printf("%+v ", err)
+						f.ExpectNoError(err)
+					}
+				}
+				ch <- struct{}{}
+			}()
+
+			select {
+			case <-ch:
+				logrus.Infof("Components are ready ")
+				result = true
+			case <-time.After(3 * time.Minute):
+				logrus.Error("timeout")
+				result = false
+
+			}
+			gomega.Expect(result).To(gomega.Equal(true))
 		})
 
 	})
