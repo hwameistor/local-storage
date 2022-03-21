@@ -177,7 +177,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			ch := make(chan struct{}, 1)
 			var result bool
 			go func() {
-				for pvc.Status.Phase == apiv1.ClaimBound {
+				for pvc.Status.Phase != apiv1.ClaimBound {
 					time.Sleep(10 * time.Second)
 					pvc := &apiv1.PersistentVolumeClaim{}
 					pvcKey := k8sclient.ObjectKey{

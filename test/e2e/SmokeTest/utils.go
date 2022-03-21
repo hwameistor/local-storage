@@ -134,7 +134,7 @@ func configureEnvironment(ctx context.Context) bool {
 	logrus.Infof("waiting for ready")
 	ch := make(chan struct{}, 1)
 	go func() {
-		for daemonset.Status.DesiredNumberScheduled != daemonset.Status.NumberAvailable && controller.Status.AvailableReplicas == int32(1) && scheduler.Status.AvailableReplicas == int32(1) {
+		for daemonset.Status.DesiredNumberScheduled != daemonset.Status.NumberAvailable || controller.Status.AvailableReplicas != int32(1) || scheduler.Status.AvailableReplicas != int32(1) {
 			time.Sleep(10 * time.Second)
 			err := client.Get(ctx, daemonsetKey, daemonset)
 			if err != nil {
