@@ -179,11 +179,6 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			go func() {
 				for pvc.Status.Phase != apiv1.ClaimBound {
 					time.Sleep(10 * time.Second)
-					pvc := &apiv1.PersistentVolumeClaim{}
-					pvcKey := k8sclient.ObjectKey{
-						Name:      "pvc-lvm",
-						Namespace: "default",
-					}
 					err = client.Get(ctx, pvcKey, pvc)
 					if err != nil {
 						logrus.Printf("%+v ", err)
@@ -197,7 +192,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			case <-ch:
 				logrus.Infof("Components are ready ")
 				result = true
-			case <-time.After(5 * time.Minute):
+			case <-time.After(3 * time.Minute):
 				logrus.Error("timeout:")
 				result = false
 
