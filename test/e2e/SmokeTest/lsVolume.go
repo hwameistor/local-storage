@@ -358,7 +358,6 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
-			time.Sleep(1 * time.Minute)
 			err = client.Get(ctx, deployKey, deployment)
 			ch := make(chan struct{}, 1)
 			var result bool
@@ -374,7 +373,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			case <-ch:
 				logrus.Infof("Deployment was deleted")
 				result = true
-			case <-time.After(5 * time.Minute):
+			case <-time.After(3 * time.Minute):
 				logrus.Error("timeout")
 				result = false
 
