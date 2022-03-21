@@ -166,6 +166,7 @@ func configureEnvironment(ctx context.Context) bool {
 	}
 
 }
+
 func uninstallHelm() {
 	logrus.Printf("helm uninstall hwameistor")
 	_ = runInLinux("helm list -A | grep 'hwameistor' | awk '{print $1}' | xargs helm uninstall -n hwameistor")
@@ -270,6 +271,7 @@ func deleteAllSC() {
 	}
 
 }
+
 func ExecInPod(config *rest.Config, namespace, podName, command, containerName string) (string, string, error) {
 	k8sCli, err := kubernetes.NewForConfig(config)
 	if err != nil {
