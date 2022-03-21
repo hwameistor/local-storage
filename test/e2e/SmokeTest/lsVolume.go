@@ -17,6 +17,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"strings"
 	"time"
 )
 
@@ -357,44 +358,13 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
-
-			ch := make(chan struct{}, 1)
-			var result bool
-			go func() {
-				deploymentList := &appsv1.DeploymentList{}
-				err = client.List(context.TODO(), deploymentList)
-				if err != nil {
-					logrus.Error(err)
-					f.ExpectNoError(err)
-				}
-				deleteResult := true
-				for true {
-					for _, deploy := range deploymentList.Items {
-						if deploy.Name == DeploymentName {
-							deleteResult = false
-						}
-
-					}
-					if deleteResult == true {
-						break
-					} else {
-						deleteResult = true
-					}
-				}
-				time.Sleep(10 * time.Second)
-				ch <- struct{}{}
-			}()
-
-			select {
-			case <-ch:
-				logrus.Infof("Components are ready ")
-				result = true
-			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout")
-				result = false
-
+			time.Sleep(1 * time.Minute)
+			err = client.Get(ctx, deployKey, deployment)
+			if strings.Contains(err.Error(), "error") {
+				logrus.Infof("true" + err.Error())
+			} else {
+				logrus.Infof("false" + err.Error())
 			}
-			gomega.Expect(result).To(gomega.Equal(true))
 
 		})
 		ginkgo.It("delete all pvc ", func() {
