@@ -360,11 +360,26 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			}
 			time.Sleep(1 * time.Minute)
 			err = client.Get(ctx, deployKey, deployment)
-			if strings.Contains(err.Error(), "error") {
-				logrus.Infof("true" + err.Error())
-			} else {
-				logrus.Infof("false" + err.Error())
+			ch := make(chan struct{}, 1)
+			var result bool
+			go func() {
+				for !strings.Contains(err.Error(), "not found") {
+					time.Sleep(3 * time.Second)
+					err = client.Get(ctx, deployKey, deployment)
+				}
+				ch <- struct{}{}
+			}()
+
+			select {
+			case <-ch:
+				logrus.Infof("Deployment was deleted")
+				result = true
+			case <-time.After(5 * time.Minute):
+				logrus.Error("timeout")
+				result = false
+
 			}
+			gomega.Expect(result).To(gomega.Equal(true))
 
 		})
 		ginkgo.It("delete all pvc ", func() {
