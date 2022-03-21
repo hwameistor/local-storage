@@ -197,8 +197,8 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			case <-ch:
 				logrus.Infof("Components are ready ")
 				result = true
-			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout : ", pvc.Status.Phase)
+			case <-time.After(5 * time.Minute):
+				logrus.Error("timeout:")
 				result = false
 
 			}
