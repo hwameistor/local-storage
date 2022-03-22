@@ -293,8 +293,9 @@ func deleteAllPVC() {
 			time.Sleep(3 * time.Second)
 			return false, nil
 
+		} else {
+			return true, nil
 		}
-		return true, nil
 	}, stop)
 	if err != nil {
 		logrus.Error(err)
