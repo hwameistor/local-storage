@@ -282,14 +282,16 @@ func deleteAllPVC() {
 			f.ExpectNoError(err)
 		}
 	}
+	err = client.List(context.TODO(), pvcList)
+	logrus.Info(pvcList)
 	stop := make(chan struct{})
-	err = wait.PollImmediateUntil(3*time.Minute, func() (done bool, err error) {
+	err = wait.PollImmediateUntil(1*time.Minute, func() (done bool, err error) {
 		if err = client.List(context.TODO(), pvcList); pvcList != nil {
 			if err != nil {
 				logrus.Error("get pvc list error ", err)
 				f.ExpectNoError(err)
 			}
-			logrus.Debug(pvcList)
+			logrus.Info(pvcList)
 			time.Sleep(3 * time.Second)
 			return false, nil
 
