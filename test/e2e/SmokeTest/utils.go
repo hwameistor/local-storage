@@ -292,9 +292,11 @@ func deleteAllPVC() {
 		logrus.Info(len(pvcList.Items))
 		if len(pvcList.Items) != 0 {
 			time.Sleep(3 * time.Second)
+			logrus.Info("false")
 			return false, nil
 
 		} else {
+			logrus.Info("true")
 			return true, nil
 		}
 	}, stop)
