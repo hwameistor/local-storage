@@ -359,14 +359,12 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
-			stop := make(chan struct{})
-			err = wait.PollImmediateUntil(3*time.Minute, func() (done bool, err error) {
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 				if err := client.Get(ctx, deployKey, deployment); !k8serror.IsNotFound(err) {
-					time.Sleep(3 * time.Second)
 					return false, nil
 				}
 				return true, nil
-			}, stop)
+			})
 			if err != nil {
 				logrus.Error(err)
 			}

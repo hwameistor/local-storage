@@ -282,25 +282,20 @@ func deleteAllPVC(ctx context.Context) {
 			f.ExpectNoError(err)
 		}
 	}
-	stop := make(chan struct{})
-	err = wait.PollImmediateUntil(2*time.Minute, func() (done bool, err error) {
-		logrus.Info("update list ")
+
+	err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 		err = client.List(ctx, pvcList)
 		if err != nil {
 			logrus.Error("delete pvc error: ", err)
 			f.ExpectNoError(err)
 		}
-		logrus.Info(len(pvcList.Items))
 		if len(pvcList.Items) != 0 {
 			time.Sleep(3 * time.Second)
-			logrus.Info("false")
 			return false, nil
-
 		} else {
-			logrus.Info("true")
 			return true, nil
 		}
-	}, stop)
+	})
 	if err != nil {
 		logrus.Error(err)
 	}
