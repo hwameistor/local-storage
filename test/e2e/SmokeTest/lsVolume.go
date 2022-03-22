@@ -370,7 +370,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			if err != nil {
 				logrus.Error(err)
 			}
-			gomega.Expect(err).To(gomega.Equal(nil))
+			gomega.Expect(err).To(gomega.BeNil())
 
 		})
 		ginkgo.It("delete all pvc ", func() {
