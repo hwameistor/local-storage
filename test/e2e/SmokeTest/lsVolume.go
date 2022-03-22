@@ -180,7 +180,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			var result bool
 			go func() {
 				for pvc.Status.Phase != apiv1.ClaimBound {
-					time.Sleep(10 * time.Second)
+					time.Sleep(5 * time.Second)
 					err = client.Get(ctx, pvcKey, pvc)
 					if err != nil {
 						logrus.Printf("%+v ", err)
@@ -217,7 +217,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			var result bool
 			go func() {
 				for deployment.Status.AvailableReplicas != int32(1) {
-					time.Sleep(10 * time.Second)
+					time.Sleep(5 * time.Second)
 					err := client.Get(ctx, deployKey, deployment)
 					if err != nil {
 						logrus.Printf("%+v ", err)
