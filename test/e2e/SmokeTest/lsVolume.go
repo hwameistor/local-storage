@@ -12,6 +12,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -19,7 +20,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"strings"
 	"time"
 )
 
@@ -362,17 +362,14 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 			}
 			stop := make(chan struct{})
 			err = wait.PollImmediateUntil(3*time.Minute, func() (done bool, err error) {
-				if err := client.Get(ctx, deployKey, deployment); !strings.Contains(err.Error(), "not found") {
-					logrus.Error("waiting for the Deployment", err.Error())
+				if err := client.Get(ctx, deployKey, deployment); !k8serror.IsNotFound(err) {
 					time.Sleep(3 * time.Second)
-					return false, errors.New("time out")
+					return false, nil
 				}
 				return true, errors.New("deployment has been removed")
 			}, stop)
-			if err == errors.New("time out") {
-				logrus.Error("time out")
-			} else {
-				logrus.Infof("deployment has been removed")
+			if err != nil {
+				logrus.Error(err)
 			}
 			gomega.Expect(err).To(gomega.Equal(errors.New("deployment has been removed")))
 
