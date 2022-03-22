@@ -262,12 +262,12 @@ func createLdc(ctx context.Context) {
 
 }
 
-func deleteAllPVC() {
+func deleteAllPVC(ctx context.Context) {
 	logrus.Printf("delete All PVC")
 	f := framework.NewDefaultFramework(ldapis.AddToScheme)
 	client := f.GetClient()
 	pvcList := &apiv1.PersistentVolumeClaimList{}
-	err := client.List(context.TODO(), pvcList)
+	err := client.List(ctx, pvcList)
 	if err != nil {
 		logrus.Error("get pvc list error ", err)
 		f.ExpectNoError(err)
@@ -275,7 +275,7 @@ func deleteAllPVC() {
 
 	for _, pvc := range pvcList.Items {
 		logrus.Printf("delete pvc:%+v ", pvc.Name)
-		ctx, _ := context.WithTimeout(context.TODO(), time.Minute)
+		ctx, _ := context.WithTimeout(ctx, time.Minute)
 		err := client.Delete(ctx, &pvc)
 		if err != nil {
 			logrus.Error("delete pvc error: ", err)
@@ -285,7 +285,7 @@ func deleteAllPVC() {
 	stop := make(chan struct{})
 	err = wait.PollImmediateUntil(1*time.Minute, func() (done bool, err error) {
 		logrus.Info("update list ")
-		err = client.List(context.TODO(), pvcList)
+		err = client.List(ctx, pvcList)
 		if err != nil {
 			logrus.Error("delete pvc error: ", err)
 			f.ExpectNoError(err)
