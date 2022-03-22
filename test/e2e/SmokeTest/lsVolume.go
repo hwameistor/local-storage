@@ -367,10 +367,14 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 					time.Sleep(3 * time.Second)
 					return false, errors.New("time out")
 				}
-				return true, errors.New("Components are ready")
+				return true, errors.New("deployment has been removed")
 			}, stop)
-			logrus.Error(err)
-			gomega.Expect(err).To(gomega.Equal(errors.New("Components are ready")))
+			if err == errors.New("time out") {
+				logrus.Error("time out")
+			} else {
+				logrus.Infof("deployment has been removed")
+			}
+			gomega.Expect(err).To(gomega.Equal(errors.New("deployment has been removed")))
 
 		})
 		ginkgo.It("delete all pvc ", func() {
