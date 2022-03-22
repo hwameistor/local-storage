@@ -208,7 +208,6 @@ func uninstallHelm() {
 
 	}
 	logrus.Printf("waiting for uninstall hwameistor")
-	time.Sleep(1 * time.Minute)
 
 }
 
