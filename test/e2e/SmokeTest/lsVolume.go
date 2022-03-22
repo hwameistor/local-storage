@@ -2,7 +2,6 @@ package SmokeTest
 
 import (
 	"context"
-	"errors"
 	"github.com/hwameistor/local-disk-manager/pkg/apis"
 	"github.com/hwameistor/local-storage/test/e2e/framework"
 	"github.com/onsi/ginkgo/v2"
@@ -366,12 +365,12 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 					time.Sleep(3 * time.Second)
 					return false, nil
 				}
-				return true, errors.New("deployment has been removed")
+				return true, nil
 			}, stop)
 			if err != nil {
 				logrus.Error(err)
 			}
-			gomega.Expect(err).To(gomega.Equal(errors.New("deployment has been removed")))
+			gomega.Expect(err).To(gomega.Equal(nil))
 
 		})
 		ginkgo.It("delete all pvc ", func() {
