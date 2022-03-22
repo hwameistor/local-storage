@@ -2,6 +2,7 @@ package SmokeTest
 
 import (
 	"context"
+	"errors"
 	"github.com/hwameistor/local-disk-manager/pkg/apis"
 	"github.com/hwameistor/local-storage/test/e2e/framework"
 	"github.com/onsi/ginkgo/v2"
@@ -15,6 +16,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"strings"
@@ -358,27 +360,17 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
-			err = client.Get(ctx, deployKey, deployment)
-			ch := make(chan struct{}, 1)
-			var result bool
-			go func() {
-				for !strings.Contains(err.Error(), "not found") {
+			stop := make(chan struct{})
+			err = wait.PollImmediateUntil(3*time.Minute, func() (done bool, err error) {
+				if err := client.Get(ctx, deployKey, deployment); !strings.Contains(err.Error(), "not found") {
+					logrus.Error("waiting for the Deployment", err.Error())
 					time.Sleep(3 * time.Second)
-					err = client.Get(ctx, deployKey, deployment)
+					return false, errors.New("time out")
 				}
-				ch <- struct{}{}
-			}()
-
-			select {
-			case <-ch:
-				logrus.Infof("Deployment was deleted")
-				result = true
-			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout")
-				result = false
-
-			}
-			gomega.Expect(result).To(gomega.Equal(true))
+				return true, errors.New("Components are ready")
+			}, stop)
+			logrus.Error(err)
+			gomega.Expect(err).To(gomega.Equal(errors.New("Components are ready")))
 
 		})
 		ginkgo.It("delete all pvc ", func() {
