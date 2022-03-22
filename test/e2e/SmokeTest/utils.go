@@ -289,6 +289,7 @@ func deleteAllPVC() {
 				logrus.Error("get pvc list error ", err)
 				f.ExpectNoError(err)
 			}
+			logrus.Debug(pvcList)
 			time.Sleep(3 * time.Second)
 			return false, nil
 
