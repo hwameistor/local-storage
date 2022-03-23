@@ -290,7 +290,6 @@ func deleteAllPVC(ctx context.Context) error {
 			f.ExpectNoError(err)
 		}
 		if len(pvcList.Items) != 0 {
-			time.Sleep(3 * time.Second)
 			return false, nil
 		} else {
 			return true, nil
@@ -331,7 +330,6 @@ func deleteAllSC(ctx context.Context) error {
 			f.ExpectNoError(err)
 		}
 		if len(scList.Items) != 0 {
-			time.Sleep(3 * time.Second)
 			return false, nil
 		} else {
 			return true, nil
