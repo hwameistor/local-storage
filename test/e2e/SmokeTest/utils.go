@@ -212,7 +212,7 @@ func uninstallHelm() {
 
 }
 
-func createLdc(ctx context.Context) {
+func createLdc(ctx context.Context) error {
 	logrus.Printf("create ldc for each node")
 	nodelist := nodeList()
 	f := framework.NewDefaultFramework(ldapis.AddToScheme)
@@ -258,6 +258,9 @@ func createLdc(ctx context.Context) {
 	})
 	if err != nil {
 		logrus.Error(err)
+		return err
+	} else {
+		return nil
 	}
 
 }
