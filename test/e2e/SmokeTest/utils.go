@@ -236,8 +236,8 @@ func createLdc(ctx context.Context) {
 			f.ExpectNoError(err)
 		}
 	}
-	stop := make(chan struct{})
-	err := wait.PollImmediateUntil(3*time.Minute, func() (done bool, err error) {
+
+	err := wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 		for _, nodes := range nodelist.Items {
 			time.Sleep(3 * time.Second)
 			localDiskClaim := &ldv1.LocalDiskClaim{}
@@ -255,7 +255,7 @@ func createLdc(ctx context.Context) {
 			}
 		}
 		return true, nil
-	}, stop)
+	})
 	if err != nil {
 		logrus.Error(err)
 	}
