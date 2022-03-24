@@ -175,31 +175,18 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				f.ExpectNoError(err)
 			}
 
-			logrus.Infof("waiting for pvc ready")
-			ch := make(chan struct{}, 1)
-			var result bool
-			go func() {
-				for pvc.Status.Phase != apiv1.ClaimBound {
-					time.Sleep(3 * time.Second)
-					err = client.Get(ctx, pvcKey, pvc)
-					if err != nil {
-						logrus.Printf("%+v ", err)
-						f.ExpectNoError(err)
-					}
+			logrus.Infof("Waiting for the PVC to be bound")
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
+					return false, nil
 				}
-				ch <- struct{}{}
-			}()
-
-			select {
-			case <-ch:
-				logrus.Infof("Components are ready ")
-				result = true
-			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout")
-				result = false
-
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("PVC binding timeout")
+				logrus.Error(err)
 			}
-			gomega.Expect(result).To(gomega.Equal(true))
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("deploy STATUS should be AVAILABLE", func() {
 			deployment := &appsv1.Deployment{}
@@ -213,30 +200,18 @@ var _ = ginkgo.Describe("test  localstorage volume ", ginkgo.Label("smokeTest"),
 				f.ExpectNoError(err)
 			}
 			logrus.Infof("waiting for the deployment to be ready ")
-			ch := make(chan struct{}, 1)
-			var result bool
-			go func() {
-				for deployment.Status.AvailableReplicas != int32(1) {
-					time.Sleep(3 * time.Second)
-					err := client.Get(ctx, deployKey, deployment)
-					if err != nil {
-						logrus.Printf("%+v ", err)
-						f.ExpectNoError(err)
-					}
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, deployKey, deployment); deployment.Status.AvailableReplicas != int32(1) {
+					return false, nil
 				}
-				ch <- struct{}{}
-			}()
-
-			select {
-			case <-ch:
-				logrus.Infof("Components are ready ")
-				result = true
-			case <-time.After(3 * time.Minute):
-				logrus.Error("timeout")
-				result = false
-
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("deployment ready timeout")
+				logrus.Error(err)
 			}
-			gomega.Expect(result).To(gomega.Equal(true))
+			gomega.Expect(err).To(gomega.BeNil())
+
 		})
 
 	})
