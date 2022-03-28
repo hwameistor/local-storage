@@ -27,8 +27,8 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("smokeTest")
 	client := f.GetClient()
 	ctx := context.TODO()
 	ginkgo.It("Configure the base environment", func() {
-		//result := configureEnvironment(ctx)
-		//gomega.Expect(result).To(gomega.Equal(true))
+		result := configureEnvironment(ctx)
+		gomega.Expect(result).To(gomega.Equal(true))
 		createLdc(ctx)
 	})
 	ginkgo.Context("create a HA-StorageClass", func() {
