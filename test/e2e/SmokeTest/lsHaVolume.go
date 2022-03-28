@@ -332,7 +332,6 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("smokeTest")
 			lvrList := &lsv1.LocalVolumeReplicaList{}
 			err := client.List(ctx, lvrList)
 			for _, lvr := range lvrList.Items {
-				logrus.Printf("%+v ", lvr.Spec.NodeName)
 				if lvr.Spec.NodeName == "k8s-master" {
 					pvc := &apiv1.PersistentVolumeClaim{}
 					pvcKey := k8sclient.ObjectKey{
