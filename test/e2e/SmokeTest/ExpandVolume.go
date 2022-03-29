@@ -183,7 +183,7 @@ var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"
 			}
 			err := client.Get(ctx, deployKey, deployment)
 			if err != nil {
-				logrus.Printf("%+v ", err)
+				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
 			logrus.Infof("waiting for the deployment to be ready ")
@@ -303,7 +303,7 @@ var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"
 
 			deployment := &appsv1.Deployment{}
 			deployKey := k8sclient.ObjectKey{
-				Name:      HaDeploymentName,
+				Name:      DeploymentName,
 				Namespace: "default",
 			}
 			err = client.Get(ctx, deployKey, deployment)
