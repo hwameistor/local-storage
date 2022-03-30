@@ -115,7 +115,7 @@ func configureEnvironment(ctx context.Context) bool {
 	}
 	err = client.Get(context.TODO(), controllerKey, controller)
 	if err != nil {
-		logrus.Error("%+v ", err)
+		logrus.Error(err)
 		f.ExpectNoError(err)
 	}
 
