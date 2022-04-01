@@ -20,7 +20,7 @@ jobs:
       - name: unit-test
         run: make unit-test
   pull_request-e2e-test:
-    runs-on: ["self-hosted"]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
