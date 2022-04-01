@@ -13,7 +13,7 @@ export snapshot="e2etest"
 # govc find . -type m -runtime.powerState poweredOn
 # govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 # govc vm.info $hosts
-echo "output username"
+echo "output username "
 echo ${GOVC_USERNAME}
 set -e
 for h in $hosts; do
