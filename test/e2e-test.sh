@@ -13,8 +13,6 @@ export snapshot="e2etest"
 # govc find . -type m -runtime.powerState poweredOn
 # govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 # govc vm.info $hosts
-echo "GOVC_URL: "
-echo ${GOVC_URL}
 set -e
 for h in $hosts; do
   if [[ `govc vm.info $h | grep poweredOn | wc -l` -eq 1 ]]; then
