@@ -13,7 +13,6 @@ export snapshot="e2etest"
 # govc find . -type m -runtime.powerState poweredOn
 # govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 # govc vm.info $hosts
-echo ${E2E_TESTING_LEVEL}
 set -e
 for h in $hosts; do
   if [[ `govc vm.info $h | grep poweredOn | wc -l` -eq 1 ]]; then
@@ -34,4 +33,4 @@ for i in `seq 1 15`; do
   sleep 6s
 done
 git clone https://github.com/hwameistor/helm-charts.git test/helm-charts
-ginkgo --fail-fast --label-filter="smokeTest" test/e2e
+ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
