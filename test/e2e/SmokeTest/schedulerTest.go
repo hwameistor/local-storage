@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 		})
 	})
 	ginkgo.Context("create a PVC", func() {
-		ginkgo.It("PVC STATUS should be Pending", func() {
+		ginkgo.It("create PVC", func() {
 			//create PVC
 			storageClassName := "local-storage-hdd-lvm"
 			examplePvc := &apiv1.PersistentVolumeClaim{
@@ -76,7 +76,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 					StorageClassName: &storageClassName,
 					Resources: apiv1.ResourceRequirements{
 						Requests: apiv1.ResourceList{
-							apiv1.ResourceStorage: resource.MustParse("1Gi"),
+							apiv1.ResourceStorage: resource.MustParse("60Gi"),
 						},
 					},
 				},
@@ -97,7 +97,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 					StorageClassName: &storageClassName,
 					Resources: apiv1.ResourceRequirements{
 						Requests: apiv1.ResourceList{
-							apiv1.ResourceStorage: resource.MustParse("1Gi"),
+							apiv1.ResourceStorage: resource.MustParse("60Gi"),
 						},
 					},
 				},
