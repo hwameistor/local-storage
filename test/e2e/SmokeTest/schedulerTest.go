@@ -113,8 +113,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 	})
 	ginkgo.Context("create a deployment", func() {
 
-		ginkgo.It("PVC STATUS should be Bound", func() {
-			//create deployment
+		ginkgo.It("create deployment", func() {
 			exampleDeployment := &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      DeploymentName,
@@ -188,7 +187,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 
 			pvc := &apiv1.PersistentVolumeClaim{}
 			pvcKey := k8sclient.ObjectKey{
-				Name:      "pvc-lvm",
+				Name:      "pvc-lvm-1",
 				Namespace: "default",
 			}
 			err = client.Get(ctx, pvcKey, pvc)
@@ -197,7 +196,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 				f.ExpectNoError(err)
 			}
 
-			logrus.Infof("Waiting for the PVC to be bound")
+			logrus.Infof("Waiting for the PVC-1 to be bound")
 			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
 					return false, nil
@@ -206,6 +205,56 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 			})
 			if err != nil {
 				logrus.Infof("PVC binding timeout")
+				logrus.Error(err)
+			}
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+		ginkgo.It("PVC-1 STATUS should be Bound", func() {
+			pvc := &apiv1.PersistentVolumeClaim{}
+			pvcKey := k8sclient.ObjectKey{
+				Name:      "pvc-lvm-1",
+				Namespace: "default",
+			}
+			err := client.Get(ctx, pvcKey, pvc)
+			if err != nil {
+				logrus.Printf("%+v ", err)
+				f.ExpectNoError(err)
+			}
+
+			logrus.Infof("Waiting for the PVC-1 to be bound")
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
+					return false, nil
+				}
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("PVC-1 binding timeout")
+				logrus.Error(err)
+			}
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+		ginkgo.It("PVC-2 STATUS should be Bound", func() {
+			pvc := &apiv1.PersistentVolumeClaim{}
+			pvcKey := k8sclient.ObjectKey{
+				Name:      "pvc-lvm-2",
+				Namespace: "default",
+			}
+			err := client.Get(ctx, pvcKey, pvc)
+			if err != nil {
+				logrus.Printf("%+v ", err)
+				f.ExpectNoError(err)
+			}
+
+			logrus.Infof("Waiting for the PVC-2 to be bound")
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
+					return false, nil
+				}
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("PVC-2 binding timeout")
 				logrus.Error(err)
 			}
 			gomega.Expect(err).To(gomega.BeNil())
@@ -273,12 +322,12 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 			containers := deployment.Spec.Template.Spec.Containers
 			for _, pod := range podlist.Items {
 				for _, container := range containers {
-					_, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data && echo it-is-a-test >test", container.Name)
+					_, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data1 && echo it-is-a-test >test", container.Name)
 					if err != nil {
 						logrus.Printf("%+v ", err)
 						f.ExpectNoError(err)
 					}
-					output, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data && cat test", container.Name)
+					output, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data1 && cat test", container.Name)
 					if err != nil {
 						logrus.Printf("%+v ", err)
 						f.ExpectNoError(err)
@@ -321,12 +370,12 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 			containers := deployment.Spec.Template.Spec.Containers
 			for _, pod := range podlist.Items {
 				for _, container := range containers {
-					_, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data && rm -rf test", container.Name)
+					_, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data1 && rm -rf test", container.Name)
 					if err != nil {
 						logrus.Printf("%+v ", err)
 						f.ExpectNoError(err)
 					}
-					output, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data && ls", container.Name)
+					output, _, err := ExecInPod(config, deployment.Namespace, pod.Name, "cd /data1 && ls", container.Name)
 					if err != nil {
 						logrus.Printf("%+v ", err)
 						f.ExpectNoError(err)
