@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("periodCheck"), func() {
+var _ = ginkgo.Describe("test scheduler", ginkgo.Label("periodCheck"), func() {
 
 	f := framework.NewDefaultFramework(apis.AddToScheme)
 	client := f.GetClient()
@@ -76,7 +76,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 					StorageClassName: &storageClassName,
 					Resources: apiv1.ResourceRequirements{
 						Requests: apiv1.ResourceList{
-							apiv1.ResourceStorage: resource.MustParse("60Gi"),
+							apiv1.ResourceStorage: resource.MustParse("1Gi"),
 						},
 					},
 				},
@@ -97,7 +97,7 @@ var _ = ginkgo.Describe("test scheduler ", ginkgo.Label("pr"), ginkgo.Label("per
 					StorageClassName: &storageClassName,
 					Resources: apiv1.ResourceRequirements{
 						Requests: apiv1.ResourceList{
-							apiv1.ResourceStorage: resource.MustParse("60Gi"),
+							apiv1.ResourceStorage: resource.MustParse("1Gi"),
 						},
 					},
 				},
