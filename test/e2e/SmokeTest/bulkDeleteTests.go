@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 				storageClassName := "local-storage-hdd-lvm-ha"
 				examplePvc := &apiv1.PersistentVolumeClaim{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "pvc-lvm-ha" + strconv.Itoa(pvcNumbers),
+						Name:      "pvc-lvm-ha-" + strconv.Itoa(pvcNumbers),
 						Namespace: "default",
 					},
 					Spec: apiv1.PersistentVolumeClaimSpec{
@@ -183,7 +183,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 
 			pvc := &apiv1.PersistentVolumeClaim{}
 			pvcKey := k8sclient.ObjectKey{
-				Name:      "pvc-lvm-ha",
+				Name:      "pvc-lvm-ha-1",
 				Namespace: "default",
 			}
 			err := client.Get(ctx, pvcKey, pvc)
