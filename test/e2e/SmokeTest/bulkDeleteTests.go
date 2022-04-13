@@ -210,6 +210,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 			}
 		})
 		ginkgo.It("deploy STATUS should be AVAILABLE", func() {
+			logrus.Infof("waiting for the deployment to be ready ")
 			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
@@ -221,7 +222,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 					logrus.Printf("%+v ", err)
 					f.ExpectNoError(err)
 				}
-				logrus.Infof("waiting for the deployment to be ready ")
+
 				err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 					if err = client.Get(ctx, deployKey, deployment); deployment.Status.AvailableReplicas != int32(1) {
 						return false, nil
