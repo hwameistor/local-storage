@@ -162,7 +162,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 								},
 								Volumes: []apiv1.Volume{
 									{
-										Name: "2048-volume-lvm-ha",
+										Name: "2048-volume-lvm-ha-" + strconv.Itoa(DeploymentNumbers),
 										VolumeSource: apiv1.VolumeSource{
 											PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
 												ClaimName: "pvc-lvm-ha-" + strconv.Itoa(DeploymentNumbers),
