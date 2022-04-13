@@ -92,141 +92,146 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 
 		ginkgo.It("create a deployment", func() {
 			//create deployment
-			exampleDeployment := &appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      HaDeploymentName,
-					Namespace: "default",
-				},
-				Spec: appsv1.DeploymentSpec{
-					Replicas: int32Ptr(1),
-					Strategy: appsv1.DeploymentStrategy{
-						Type: appsv1.RecreateDeploymentStrategyType,
+			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+				exampleDeployment := &appsv1.Deployment{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
+						Namespace: "default",
 					},
-					Selector: &metav1.LabelSelector{
-						MatchLabels: map[string]string{
-							"app": "demo",
+					Spec: appsv1.DeploymentSpec{
+						Replicas: int32Ptr(1),
+						Strategy: appsv1.DeploymentStrategy{
+							Type: appsv1.RecreateDeploymentStrategyType,
 						},
-					},
-					Template: apiv1.PodTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							Labels: map[string]string{
+						Selector: &metav1.LabelSelector{
+							MatchLabels: map[string]string{
 								"app": "demo",
 							},
 						},
-						Spec: apiv1.PodSpec{
-							SchedulerName: "hwameistor-scheduler",
-							Affinity: &apiv1.Affinity{
-								NodeAffinity: &apiv1.NodeAffinity{
-									RequiredDuringSchedulingIgnoredDuringExecution: &apiv1.NodeSelector{
-										NodeSelectorTerms: []apiv1.NodeSelectorTerm{
-											{
-												[]apiv1.NodeSelectorRequirement{
-													{
-														Key:      "kubernetes.io/hostname",
-														Operator: apiv1.NodeSelectorOpIn,
-														Values: []string{
-															"k8s-node1",
+						Template: apiv1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Labels: map[string]string{
+									"app": "demo",
+								},
+							},
+							Spec: apiv1.PodSpec{
+								SchedulerName: "hwameistor-scheduler",
+								Affinity: &apiv1.Affinity{
+									NodeAffinity: &apiv1.NodeAffinity{
+										RequiredDuringSchedulingIgnoredDuringExecution: &apiv1.NodeSelector{
+											NodeSelectorTerms: []apiv1.NodeSelectorTerm{
+												{
+													[]apiv1.NodeSelectorRequirement{
+														{
+															Key:      "kubernetes.io/hostname",
+															Operator: apiv1.NodeSelectorOpIn,
+															Values: []string{
+																"k8s-node1",
+															},
 														},
 													},
+													[]apiv1.NodeSelectorRequirement{},
 												},
-												[]apiv1.NodeSelectorRequirement{},
+											},
+										},
+										PreferredDuringSchedulingIgnoredDuringExecution: nil,
+									},
+									PodAffinity:     nil,
+									PodAntiAffinity: nil,
+								},
+								Containers: []apiv1.Container{
+									{
+										Name:  "web",
+										Image: "daocloud.io/daocloud/dao-2048:latest",
+										Ports: []apiv1.ContainerPort{
+											{
+												Name:          "http",
+												Protocol:      apiv1.ProtocolTCP,
+												ContainerPort: 80,
+											},
+										},
+										VolumeMounts: []apiv1.VolumeMount{
+											{
+												Name:      "2048-volume-lvm-ha",
+												MountPath: "/data",
 											},
 										},
 									},
-									PreferredDuringSchedulingIgnoredDuringExecution: nil,
 								},
-								PodAffinity:     nil,
-								PodAntiAffinity: nil,
-							},
-							Containers: []apiv1.Container{
-								{
-									Name:  "web",
-									Image: "daocloud.io/daocloud/dao-2048:latest",
-									Ports: []apiv1.ContainerPort{
-										{
-											Name:          "http",
-											Protocol:      apiv1.ProtocolTCP,
-											ContainerPort: 80,
-										},
-									},
-									VolumeMounts: []apiv1.VolumeMount{
-										{
-											Name:      "2048-volume-lvm-ha",
-											MountPath: "/data",
-										},
-									},
-								},
-							},
-							Volumes: []apiv1.Volume{
-								{
-									Name: "2048-volume-lvm-ha",
-									VolumeSource: apiv1.VolumeSource{
-										PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
-											ClaimName: "pvc-lvm-ha-1",
+								Volumes: []apiv1.Volume{
+									{
+										Name: "2048-volume-lvm-ha",
+										VolumeSource: apiv1.VolumeSource{
+											PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
+												ClaimName: "pvc-lvm-ha-1",
+											},
 										},
 									},
 								},
 							},
 						},
 					},
-				},
-			}
-			err := client.Create(ctx, exampleDeployment)
-			if err != nil {
-				logrus.Printf("%+v ", err)
-				f.ExpectNoError(err)
-			}
+				}
+				err := client.Create(ctx, exampleDeployment)
+				if err != nil {
+					logrus.Printf("%+v ", err)
+					f.ExpectNoError(err)
+				}
 
-			gomega.Expect(err).To(gomega.BeNil())
+				gomega.Expect(err).To(gomega.BeNil())
+			}
 		})
 		ginkgo.It("PVC STATUS should be Bound", func() {
-
-			pvc := &apiv1.PersistentVolumeClaim{}
-			pvcKey := k8sclient.ObjectKey{
-				Name:      "pvc-lvm-ha-1",
-				Namespace: "default",
-			}
-			err := client.Get(ctx, pvcKey, pvc)
-			if err != nil {
-				logrus.Printf("%+v ", err)
-				f.ExpectNoError(err)
-			}
-			logrus.Infof("Waiting for the PVC to be bound")
-			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
-				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
-					return false, nil
+			for pvcNumbers := 1; pvcNumbers <= 30; pvcNumbers++ {
+				pvc := &apiv1.PersistentVolumeClaim{}
+				pvcKey := k8sclient.ObjectKey{
+					Name:      "pvc-lvm-ha-" + strconv.Itoa(pvcNumbers),
+					Namespace: "default",
 				}
-				return true, nil
-			})
-			if err != nil {
-				logrus.Infof("PVC binding timeout")
-				logrus.Error(err)
+				err := client.Get(ctx, pvcKey, pvc)
+				if err != nil {
+					logrus.Printf("%+v ", err)
+					f.ExpectNoError(err)
+				}
+				logrus.Infof("Waiting for the PVC to be bound")
+				err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+					if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
+						return false, nil
+					}
+					return true, nil
+				})
+				if err != nil {
+					logrus.Infof("PVC binding timeout")
+					logrus.Error(err)
+				}
+				gomega.Expect(err).To(gomega.BeNil())
 			}
-			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("deploy STATUS should be AVAILABLE", func() {
-			deployment := &appsv1.Deployment{}
-			deployKey := k8sclient.ObjectKey{
-				Name:      HaDeploymentName,
-				Namespace: "default",
-			}
-			err := client.Get(ctx, deployKey, deployment)
-			if err != nil {
-				logrus.Printf("%+v ", err)
-				f.ExpectNoError(err)
-			}
-			logrus.Infof("waiting for the deployment to be ready ")
-			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
-				if err = client.Get(ctx, deployKey, deployment); deployment.Status.AvailableReplicas != int32(1) {
-					return false, nil
+			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+				deployment := &appsv1.Deployment{}
+				deployKey := k8sclient.ObjectKey{
+					Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
+					Namespace: "default",
 				}
-				return true, nil
-			})
-			if err != nil {
-				logrus.Infof("deployment ready timeout")
-				logrus.Error(err)
+				err := client.Get(ctx, deployKey, deployment)
+				if err != nil {
+					logrus.Printf("%+v ", err)
+					f.ExpectNoError(err)
+				}
+				logrus.Infof("waiting for the deployment to be ready ")
+				err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+					if err = client.Get(ctx, deployKey, deployment); deployment.Status.AvailableReplicas != int32(1) {
+						return false, nil
+					}
+					return true, nil
+				})
+				if err != nil {
+					logrus.Infof("deployment ready timeout")
+					logrus.Error(err)
+				}
+				gomega.Expect(err).To(gomega.BeNil())
 			}
-			gomega.Expect(err).To(gomega.BeNil())
 		})
 
 	})
