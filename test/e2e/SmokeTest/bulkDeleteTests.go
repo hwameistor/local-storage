@@ -2,6 +2,7 @@ package SmokeTest
 
 import (
 	"context"
+	ldapis "github.com/hwameistor/local-disk-manager/pkg/apis"
 	lsv1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/test/e2e/framework"
 	"github.com/onsi/ginkgo/v2"
@@ -153,7 +154,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 										},
 										VolumeMounts: []apiv1.VolumeMount{
 											{
-												Name:      "2048-volume-lvm-ha",
+												Name:      "2048-volume-lvm-ha-" + strconv.Itoa(DeploymentNumbers),
 												MountPath: "/data",
 											},
 										},
@@ -164,7 +165,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 										Name: "2048-volume-lvm-ha",
 										VolumeSource: apiv1.VolumeSource{
 											PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
-												ClaimName: "pvc-lvm-ha-1",
+												ClaimName: "pvc-lvm-ha-" + strconv.Itoa(DeploymentNumbers),
 											},
 										},
 									},
@@ -271,6 +272,29 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 		})
 		ginkgo.It("delete all pvc", func() {
 			err := deleteAllPVC(ctx)
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+		ginkgo.It("check pv", func() {
+			logrus.Printf("check pv")
+			f := framework.NewDefaultFramework(ldapis.AddToScheme)
+			client := f.GetClient()
+			pvList := &apiv1.PersistentVolumeList{}
+
+			err := wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				err = client.List(ctx, pvList)
+				if err != nil {
+					logrus.Error("get pv list error", err)
+					f.ExpectNoError(err)
+				}
+				if len(pvList.Items) != 0 {
+					return false, nil
+				} else {
+					return true, nil
+				}
+			})
+			if err != nil {
+				logrus.Error(err)
+			}
 			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("delete all sc", func() {
