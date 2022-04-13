@@ -184,6 +184,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 			}
 		})
 		ginkgo.It("PVC STATUS should be Bound", func() {
+			logrus.Infof("Waiting for the PVC to be bound")
 			for pvcNumbers := 1; pvcNumbers <= 30; pvcNumbers++ {
 				pvc := &apiv1.PersistentVolumeClaim{}
 				pvcKey := k8sclient.ObjectKey{
@@ -195,7 +196,6 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 					logrus.Printf("%+v ", err)
 					f.ExpectNoError(err)
 				}
-				logrus.Infof("Waiting for the PVC to be bound")
 				err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 					if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
 						return false, nil
