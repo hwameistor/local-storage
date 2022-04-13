@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -88,9 +89,9 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 		})
 
 	})
-	ginkgo.Context("create a deployment", func() {
+	ginkgo.Context("create 30 deployment", func() {
 
-		ginkgo.It("create a deployment", func() {
+		ginkgo.It("create deployments", func() {
 			//create deployment
 			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
 				exampleDeployment := &appsv1.Deployment{
@@ -238,22 +239,33 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 	ginkgo.Context("Clean up the environment", func() {
 		ginkgo.It("Delete test Deployment", func() {
 			//delete deploy
-			deployment := &appsv1.Deployment{}
-			deployKey := k8sclient.ObjectKey{
-				Name:      HaDeploymentName,
-				Namespace: "default",
-			}
-			err := client.Get(ctx, deployKey, deployment)
-			if err != nil {
-				logrus.Printf("%+v ", err)
-				f.ExpectNoError(err)
-			}
-			logrus.Printf("deleting test Deployment ")
-			time.Sleep(1 * time.Minute)
-			err = client.Delete(ctx, deployment)
-			if err != nil {
-				logrus.Printf("%+v ", err)
-				f.ExpectNoError(err)
+			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+				deployment := &appsv1.Deployment{}
+				deployKey := k8sclient.ObjectKey{
+					Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
+					Namespace: "default",
+				}
+				err := client.Get(ctx, deployKey, deployment)
+				if err != nil {
+					logrus.Printf("%+v ", err)
+					f.ExpectNoError(err)
+				}
+				logrus.Printf("deleting test Deployment")
+				err = client.Delete(ctx, deployment)
+				if err != nil {
+					logrus.Error(err)
+					f.ExpectNoError(err)
+				}
+				err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+					if err := client.Get(ctx, deployKey, deployment); !k8serror.IsNotFound(err) {
+						return false, nil
+					}
+					return true, nil
+				})
+				if err != nil {
+					logrus.Error(err)
+				}
+				gomega.Expect(err).To(gomega.BeNil())
 			}
 
 		})
