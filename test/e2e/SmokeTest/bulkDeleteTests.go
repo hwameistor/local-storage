@@ -240,6 +240,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 	ginkgo.Context("Clean up the environment", func() {
 		ginkgo.It("Delete test Deployment", func() {
 			//delete deploy
+			logrus.Printf("deleting test Deployment")
 			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
@@ -251,7 +252,6 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
 					logrus.Printf("%+v ", err)
 					f.ExpectNoError(err)
 				}
-				logrus.Printf("deleting test Deployment")
 				err = client.Delete(ctx, deployment)
 				if err != nil {
 					logrus.Error(err)
