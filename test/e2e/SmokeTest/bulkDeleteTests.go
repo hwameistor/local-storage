@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("pr"), func() {
+var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label(""), func() {
 
 	f := framework.NewDefaultFramework(lsv1.AddToScheme)
 	client := f.GetClient()
