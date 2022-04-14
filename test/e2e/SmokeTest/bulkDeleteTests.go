@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("test"), func() {
 	ginkgo.Context("create 30 HA-PersistentVolumeClaims", func() {
 		ginkgo.It("create PVCs", func() {
 			//create PVC
-			for pvcNumbers := 1; pvcNumbers <= 30; pvcNumbers++ {
+			for pvcNumbers := 1; pvcNumbers <= NumberOfBulDeleteTests; pvcNumbers++ {
 				storageClassName := "local-storage-hdd-lvm-ha"
 				examplePvc := &apiv1.PersistentVolumeClaim{
 					ObjectMeta: metav1.ObjectMeta{
@@ -94,7 +94,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("test"), func() {
 
 		ginkgo.It("create deployments", func() {
 			//create deployment
-			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+			for DeploymentNumbers := 1; DeploymentNumbers <= NumberOfBulDeleteTests; DeploymentNumbers++ {
 				exampleDeployment := &appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
@@ -185,7 +185,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("test"), func() {
 		})
 		ginkgo.It("PVC STATUS should be Bound", func() {
 			logrus.Infof("Waiting for the PVC to be bound")
-			for pvcNumbers := 1; pvcNumbers <= 30; pvcNumbers++ {
+			for pvcNumbers := 1; pvcNumbers <= NumberOfBulDeleteTests; pvcNumbers++ {
 				pvc := &apiv1.PersistentVolumeClaim{}
 				pvcKey := k8sclient.ObjectKey{
 					Name:      "pvc-lvm-ha-" + strconv.Itoa(pvcNumbers),
@@ -211,7 +211,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("test"), func() {
 		})
 		ginkgo.It("deploy STATUS should be AVAILABLE", func() {
 			logrus.Infof("waiting for the deployment to be ready ")
-			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+			for DeploymentNumbers := 1; DeploymentNumbers <= NumberOfBulDeleteTests; DeploymentNumbers++ {
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
 					Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
@@ -242,7 +242,7 @@ var _ = ginkgo.Describe("Bulk delete tests", ginkgo.Label("test"), func() {
 		ginkgo.It("Delete test Deployment", func() {
 			//delete deploy
 			logrus.Printf("deleting test Deployment")
-			for DeploymentNumbers := 1; DeploymentNumbers <= 30; DeploymentNumbers++ {
+			for DeploymentNumbers := 1; DeploymentNumbers <= NumberOfBulDeleteTests; DeploymentNumbers++ {
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
 					Name:      HaDeploymentName + strconv.Itoa(DeploymentNumbers),
