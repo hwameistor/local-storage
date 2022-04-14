@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"), func() {
+var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("periodCheck"), func() {
 	f := framework.NewDefaultFramework(lsv1.AddToScheme)
 	client := f.GetClient()
 	ctx := context.TODO()
@@ -61,7 +61,7 @@ var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"
 		})
 	})
 	ginkgo.Context("create a PVC", func() {
-		ginkgo.It("PVC STATUS should be Pending", func() {
+		ginkgo.It("create a PVC", func() {
 			//create PVC
 			storageClassName := "local-storage-hdd-lvm"
 			examplePvc := &apiv1.PersistentVolumeClaim{
@@ -90,7 +90,7 @@ var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"
 	})
 	ginkgo.Context("create a deployment", func() {
 
-		ginkgo.It("PVC STATUS should be Bound", func() {
+		ginkgo.It("create deployment", func() {
 			//create deployment
 			exampleDeployment := &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
@@ -150,13 +150,15 @@ var _ = ginkgo.Describe("test localstorage expand volume", ginkgo.Label("expand"
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+		ginkgo.It("PVC STATUS should be Bound", func() {
 			pvc := &apiv1.PersistentVolumeClaim{}
 			pvcKey := k8sclient.ObjectKey{
 				Name:      "pvc-lvm",
 				Namespace: "default",
 			}
-			err = client.Get(ctx, pvcKey, pvc)
+			err := client.Get(ctx, pvcKey, pvc)
 			if err != nil {
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
