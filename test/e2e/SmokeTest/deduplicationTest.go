@@ -87,7 +87,7 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("pr"), func(
 
 				gomega.Expect(err).To(gomega.BeNil())
 			})
-			ginkgo.It("create a deployment", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"create a deployment", func() {
 				//create deployment
 				exampleDeployment := &appsv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
@@ -176,7 +176,7 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("pr"), func(
 
 				gomega.Expect(err).To(gomega.BeNil())
 			})
-			ginkgo.It("PVC STATUS should be Bound", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"PVC STATUS should be Bound", func() {
 
 				pvc := &apiv1.PersistentVolumeClaim{}
 				pvcKey := k8sclient.ObjectKey{
@@ -201,7 +201,7 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("pr"), func(
 				}
 				gomega.Expect(err).To(gomega.BeNil())
 			})
-			ginkgo.It("deploy STATUS should be AVAILABLE", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"deploy STATUS should be AVAILABLE", func() {
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
 					Name:      HaDeploymentName,
@@ -225,7 +225,7 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("pr"), func(
 				}
 				gomega.Expect(err).To(gomega.BeNil())
 			})
-			ginkgo.It("Delete test Deployment", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"Delete test Deployment", func() {
 				//delete deploy
 				deployment := &appsv1.Deployment{}
 				deployKey := k8sclient.ObjectKey{
@@ -254,11 +254,11 @@ var _ = ginkgo.Describe("test localstorage Ha volume", ginkgo.Label("pr"), func(
 				gomega.Expect(err).To(gomega.BeNil())
 
 			})
-			ginkgo.It("delete all pvc", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"delete all pvc", func() {
 				err := deleteAllPVC(ctx)
 				gomega.Expect(err).To(gomega.BeNil())
 			})
-			ginkgo.It("check pv", func() {
+			ginkgo.It(strconv.Itoa(testNumbers)+"check pv", func() {
 				logrus.Printf("check pv")
 				f := framework.NewDefaultFramework(ldapis.AddToScheme)
 				client := f.GetClient()
