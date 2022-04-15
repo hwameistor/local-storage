@@ -3,15 +3,18 @@ package node
 import (
 	"context"
 	"fmt"
+	"github.com/hwameistor/local-storage/pkg/member/node/storage"
+	"k8s.io/client-go/tools/record"
 	"net"
 	"os"
 
 	ldmv1alpha1 "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
+	ldctr "github.com/hwameistor/local-disk-manager/pkg/controller/localdisk"
 	"github.com/hwameistor/local-storage/pkg/apis"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/pkg/common"
 	"github.com/hwameistor/local-storage/pkg/member/node/diskmonitor"
-	"github.com/hwameistor/local-storage/pkg/member/node/storage"
+	rdmgr "github.com/hwameistor/reliable-helper-system/pkg/replacedisk/manager"
 	log "github.com/sirupsen/logrus"
 
 	k8scorev1 "k8s.io/api/core/v1"
@@ -59,11 +62,16 @@ type manager struct {
 
 	configManager *configManager
 
+	ldhandler *ldctr.LocalDiskHandler
+
+	rdhandler *rdmgr.ReplaceDiskHandler
+
 	logger *log.Entry
 }
 
 // New node manager
 func New(name string, namespace string, cli client.Client, informersCache runtimecache.Cache, config apisv1alpha1.SystemConfig) (apis.NodeManager, error) {
+	var recorder record.EventRecorder
 	configManager, err := NewConfigManager(name, config, cli)
 	if err != nil {
 		return nil, err
@@ -81,6 +89,8 @@ func New(name string, namespace string, cli client.Client, informersCache runtim
 		// healthCheckQueue:        common.NewTaskQueue("HealthCheckTask", maxRetries),
 		diskEventQueue: diskmonitor.NewEventQueue("DiskEvents"),
 		configManager:  configManager,
+		ldhandler:      ldctr.NewLocalDiskHandler(cli, recorder),
+		rdhandler:      rdmgr.NewReplaceDiskHandler(cli, recorder),
 		logger:         log.WithField("Module", "NodeManager"),
 	}, nil
 }
@@ -190,6 +200,7 @@ func (m *manager) setupInformers() {
 		m.logger.WithError(err).Fatal("Failed to get informer for LocalDisk")
 	}
 	localDiskInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    m.handleLocalDiskAdd,
 		UpdateFunc: m.handleLocalDiskUpdate,
 	})
 
@@ -335,6 +346,14 @@ func (m *manager) handleLocalDiskClaimAdd(obj interface{}) {
 
 func (m *manager) handleLocalDiskUpdate(oldObj, newObj interface{}) {
 	localDisk, _ := newObj.(*ldmv1alpha1.LocalDisk)
+	if localDisk.Spec.NodeName != m.name {
+		return
+	}
+	m.localDiskTaskQueue.Add(localDisk.Namespace + "/" + localDisk.Name)
+}
+
+func (m *manager) handleLocalDiskAdd(obj interface{}) {
+	localDisk, _ := obj.(*ldmv1alpha1.LocalDisk)
 	if localDisk.Spec.NodeName != m.name {
 		return
 	}
