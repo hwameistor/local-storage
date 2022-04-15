@@ -1,10 +1,10 @@
 name: Period check
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 18 * * *'
 
 jobs:
-  period-check:
+  period-check-unit-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,3 +17,14 @@ jobs:
           go-version: 1.17
       - name: Unit test
         run: make unit-test
+  period-check-e2e-test:
+    runs-on: ["self-hosted"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: e2e test
+        env:
+          E2E_TESTING_LEVEL: "periodCheck"
+        run: make e2e-test

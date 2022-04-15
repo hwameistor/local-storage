@@ -11,24 +11,26 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"time"
 )
 
-var _ = ginkgo.Describe("test  localstorage volume ", func() {
+var _ = ginkgo.Describe("test localstorage volume ", ginkgo.Label("pr"), ginkgo.Label("periodCheck"), func() {
 
 	f := framework.NewDefaultFramework(apis.AddToScheme)
 	client := f.GetClient()
 	ctx := context.TODO()
 	ginkgo.It("Configure the base environment", func() {
-		installHwameiStorByHelm()
-		addLabels()
-		createLdc()
+		result := configureEnvironment(ctx)
+		gomega.Expect(result).To(gomega.Equal(true))
+		createLdc(ctx)
 
 	})
 	ginkgo.Context("create a StorageClass", func() {
@@ -40,7 +42,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "local-storage-hdd-lvm",
 				},
-				Provisioner: "localstorage.hwameistor.io",
+				Provisioner: "lvm.hwameistor.io",
 				Parameters: map[string]string{
 					"replicaNumber":             "1",
 					"poolClass":                 "HDD",
@@ -61,7 +63,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 		})
 	})
 	ginkgo.Context("create a PVC", func() {
-		ginkgo.It("PVC STATUS should be Pending", func() {
+		ginkgo.It("create PVC", func() {
 			//create PVC
 			storageClassName := "local-storage-hdd-lvm"
 			examplePvc := &apiv1.PersistentVolumeClaim{
@@ -85,23 +87,13 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 				f.ExpectNoError(err)
 			}
 
-			pvc := &apiv1.PersistentVolumeClaim{}
-			pvcKey := k8sclient.ObjectKey{
-				Name:      "pvc-lvm",
-				Namespace: "default",
-			}
-			err = client.Get(ctx, pvcKey, pvc)
-			if err != nil {
-				logrus.Printf("Failed to find pvc ：%+v ", err)
-				f.ExpectNoError(err)
-			}
-			gomega.Expect(pvc.Status.Phase).To(gomega.Equal(apiv1.ClaimPending))
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 
 	})
 	ginkgo.Context("create a deployment", func() {
 
-		ginkgo.It("PVC STATUS should be Bound", func() {
+		ginkgo.It("create deployment", func() {
 			//create deployment
 			exampleDeployment := &appsv1.Deployment{
 				ObjectMeta: metav1.ObjectMeta{
@@ -161,18 +153,32 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-			time.Sleep(1 * time.Minute)
+			gomega.Expect(err).To(gomega.BeNil())
+		})
+		ginkgo.It("PVC STATUS should be Bound", func() {
 			pvc := &apiv1.PersistentVolumeClaim{}
 			pvcKey := k8sclient.ObjectKey{
 				Name:      "pvc-lvm",
 				Namespace: "default",
 			}
-			err = client.Get(ctx, pvcKey, pvc)
+			err := client.Get(ctx, pvcKey, pvc)
 			if err != nil {
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-			gomega.Expect(pvc.Status.Phase).To(gomega.Equal(apiv1.ClaimBound))
+
+			logrus.Infof("Waiting for the PVC to be bound")
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, pvcKey, pvc); pvc.Status.Phase != apiv1.ClaimBound {
+					return false, nil
+				}
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("PVC binding timeout")
+				logrus.Error(err)
+			}
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("deploy STATUS should be AVAILABLE", func() {
 			deployment := &appsv1.Deployment{}
@@ -185,12 +191,24 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 				logrus.Printf("%+v ", err)
 				f.ExpectNoError(err)
 			}
-			gomega.Expect(deployment.Status.AvailableReplicas).To(gomega.Equal(int32(1)))
+			logrus.Infof("waiting for the deployment to be ready ")
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err = client.Get(ctx, deployKey, deployment); deployment.Status.AvailableReplicas != int32(1) {
+					return false, nil
+				}
+				return true, nil
+			})
+			if err != nil {
+				logrus.Infof("deployment ready timeout")
+				logrus.Error(err)
+			}
+			gomega.Expect(err).To(gomega.BeNil())
+
 		})
 
 	})
-	ginkgo.Context("Using volumes", func() {
-		ginkgo.It("Write", func() {
+	ginkgo.Context("Test the volume", func() {
+		ginkgo.It("write test data", func() {
 
 			config, err := config.GetConfig()
 			if err != nil {
@@ -239,7 +257,7 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 				}
 			}
 		})
-		ginkgo.It("Delete", func() {
+		ginkgo.It("Delete test data", func() {
 			config, err := config.GetConfig()
 			if err != nil {
 				return
@@ -298,27 +316,38 @@ var _ = ginkgo.Describe("test  localstorage volume ", func() {
 			}
 			err := client.Get(ctx, deployKey, deployment)
 			if err != nil {
-				logrus.Printf("%+v ", err)
+				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
-			logrus.Printf("deleting test Deployment ")
-			time.Sleep(1 * time.Minute)
+			logrus.Infof("deleting test Deployment ")
+
 			err = client.Delete(ctx, deployment)
 			if err != nil {
-				logrus.Printf("%+v ", err)
+				logrus.Error(err)
 				f.ExpectNoError(err)
 			}
+			err = wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
+				if err := client.Get(ctx, deployKey, deployment); !k8serror.IsNotFound(err) {
+					return false, nil
+				}
+				return true, nil
+			})
+			if err != nil {
+				logrus.Error(err)
+			}
+			gomega.Expect(err).To(gomega.BeNil())
 
 		})
 		ginkgo.It("delete all pvc ", func() {
-			deleteAllPVC()
+			err := deleteAllPVC(ctx)
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("delete all sc", func() {
-			deleteAllSC()
+			err := deleteAllSC(ctx)
+			gomega.Expect(err).To(gomega.BeNil())
 		})
 		ginkgo.It("delete helm", func() {
 			uninstallHelm()
-
 		})
 	})
 
