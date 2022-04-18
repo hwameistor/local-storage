@@ -33,4 +33,6 @@ for i in `seq 1 15`; do
   sleep 6s
 done
 git clone https://github.com/hwameistor/helm-charts.git test/helm-charts
+sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/test.yaml
+sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/test.yaml
 ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
