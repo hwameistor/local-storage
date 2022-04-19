@@ -14,6 +14,28 @@ export snapshot="e2etest"
 # govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 # govc vm.info $hosts
 set -e
+echo docker login
+cat test/helm-charts/charts/hwameistor/values.yaml | while read line
+do
+    result=$(echo $line | grep "imageRepository")
+    if [[ "$result" != "" ]]
+    then
+        img=${line:17:50}
+    fi
+    result=$(echo $line | grep "tag")
+    if [[ "$result" != "" ]]
+    then
+        hwamei=$(echo $img | grep "hwameistor")
+        if [[ "$hwamei" != "" ]]
+        then
+            image=ghcr.io/$img:${line:5:50}
+            echo docker pull $image
+#            docker pull $image
+            echo docker push $image
+        fi
+    fi
+done
+
 for h in $hosts; do
   if [[ `govc vm.info $h | grep poweredOn | wc -l` -eq 1 ]]; then
     govc vm.power -off -force $h
@@ -33,6 +55,6 @@ for i in `seq 1 15`; do
   sleep 6s
 done
 git clone https://github.com/hwameistor/helm-charts.git test/helm-charts
-sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/test.yaml
-sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/test.yaml
-ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
+sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/values.yaml
+sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/values.yaml
+# ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
