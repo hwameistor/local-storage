@@ -55,6 +55,6 @@ do
         fi
     fi
 done
-sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/values.yaml
-sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/values.yaml
+#sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/values.yaml
+#sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/values.yaml
 # ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
