@@ -50,10 +50,10 @@ do
             image=$img:${line:5:50}
             echo "docker pull ghcr.io/$image"
             docker pull ghcr.io/$image
-            echo "docker tag ghcr.io/$image 10.6.170.180/hwamei-e2e/$image"
-            docker tag ghcr.io/$image 10.6.170.180/hwamei-e2e/$image
-            echo "docker push 10.6.170.180/hwamei-e2e/$image"
-            docker push 10.6.170.180/hwamei-e2e/$image
+            echo "docker tag ghcr.io/$image 10.6.170.180/hwameistor/$image"
+            docker tag ghcr.io/$image 10.6.170.180/hwameistor/$image
+            echo "docker push 10.6.170.180/hwameistor/$image"
+            docker push 10.6.170.180/hwameistor/$image
         fi
     fi
 done
