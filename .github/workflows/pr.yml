@@ -32,6 +32,8 @@ jobs:
         with:
           image: tonistiigi/binfmt:latest
           platforms: all
+      - name: Available platforms
+        run: echo ${{ steps.qemu.outputs.platforms }}
       - name: Set env
         run: |
           echo "PROJECT_SOURCE_CODE_DIR=`echo ${GITHUB_WORKSPACE}`" >> $GITHUB_ENV
