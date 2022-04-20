@@ -34,8 +34,30 @@ for i in `seq 1 15`; do
   sleep 6s
 done
 git clone https://github.com/hwameistor/helm-charts.git test/helm-charts
-cat test/helm-charts/charts/hwameistor/values.yaml
-
+echo "it is a test"
+cat test/helm-charts/charts/hwameistor/values.yaml | while read line
+##
+do
+result=$(echo $line | grep "imageRepository")
+if [[ "$result" != "" ]]
+then
+img=${line:17:50}
+fi
+result=$(echo $line | grep "tag")
+if [[ "$result" != "" ]]
+then
+hwamei=$(echo $img | grep "hwameistor")
+if [[ "$hwamei" != "" ]]
+then
+image=$img:${line:5:50}
+echo "docker pull ghcr.io/$image"
+#         docker pull $image
+echo "docker tag ghcr.io/$image 10.6.170.180/hwamei-e2e/$image"
+echo "docker push 10.6.170.180/hwamei-e2e/$image"
+fi
+fi
+done
+##
 #sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/values.yaml
 #sed -i '/local-storage/a \ \ \ \ tag: test' test/helm-charts/charts/hwameistor/values.yaml
 # ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
