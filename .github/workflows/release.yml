@@ -29,6 +29,6 @@ jobs:
           echo "RELEASE_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
           echo "PROJECT_SOURCE_CODE_DIR=`echo ${GITHUB_WORKSPACE}`" >> $GITHUB_ENV
           echo "IMAGE_REGISTRY=`echo ghcr.io/$(echo ${{ github.repository_owner }} | tr 'A-Z' 'a-z')`" >> $GITHUB_ENV
-      - name: release
+      - name: make image & e2e-test
         run: |
           PROJECT_SOURCE_CODE_DIR=${PROJECT_SOURCE_CODE_DIR} IMAGE_REGISTRY=${IMAGE_REGISTRY} RELEASE_TAG=${RELEASE_TAG} make release
