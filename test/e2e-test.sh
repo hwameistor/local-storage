@@ -58,7 +58,7 @@ do
     fi
 done
 ##
-sed -i '/.*ghcr.io*/c\hwameistorImageRegistry: 10.6.170.180'
+sed -i '/.*ghcr.io*/c\hwameistorImageRegistry: 10.6.170.180' test/helm-charts/charts/hwameistor/values.yaml
 sed -i '/local-storage/{n;d}' test/helm-charts/charts/hwameistor/values.yaml
 sed -i '/local-storage/a \ \ \ \ tag: 99.9-dev' test/helm-charts/charts/hwameistor/values.yaml
 ginkgo --fail-fast --label-filter=${E2E_TESTING_LEVEL} test/e2e
