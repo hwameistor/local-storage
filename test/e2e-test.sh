@@ -13,26 +13,7 @@ export snapshot="e2etest"
 # govc find . -type m -runtime.powerState poweredOn
 # govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 # govc vm.info $hosts
-set -e
 
-for h in $hosts; do
-  if [[ `govc vm.info $h | grep poweredOn | wc -l` -eq 1 ]]; then
-    govc vm.power -off -force $h
-    echo -e "\033[35m === $h has been down === \033[0m"
-  fi
-
-  govc snapshot.revert -vm $h $snapshot
-  echo -e "\033[35m === $h reverted to snapshot: `govc snapshot.tree -vm $h -C -D -i -d` === \033[0m"
-
-  govc vm.power -on $h
-  echo -e "\033[35m === $h: power turned on === \033[0m"
-done
-
-echo -e "\033[35m === task will end in 1m 30s === \033[0m"
-for i in `seq 1 15`; do
-  echo -e "\033[35m === `date  '+%Y-%m-%d %H:%M:%S'` === \033[0m"
-  sleep 6s
-done
 git clone https://github.com/hwameistor/helm-charts.git test/helm-charts
 echo "it is a test"
 cat test/helm-charts/charts/hwameistor/values.yaml | while read line
