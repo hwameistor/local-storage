@@ -51,7 +51,7 @@ do
             echo "docker pull ghcr.io/$image"
             docker pull ghcr.io/$image
             echo "docker tag ghcr.io/$image 10.6.170.180/$image"
-            docker tag ghcr.io/$image 10.6.170.180/hwameistor/$image
+            docker tag ghcr.io/$image 10.6.170.180/$image
             echo "docker push 10.6.170.180/$image"
             docker push 10.6.170.180/$image
         fi
