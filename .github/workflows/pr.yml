@@ -23,6 +23,9 @@ jobs:
     runs-on: ["self-hosted"]
     steps:
       - name: Checkout
+        run: |
+          rm -rf "/github/actions-runner/_work/local-storage/local-storage/_build"
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
