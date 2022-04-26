@@ -97,6 +97,3 @@ e2e-test:
 	make image
 	docker push ${IMAGE_NAME}:${IMAGE_TAG}
 	bash test/e2e-test.sh
-
-e2e-delete:
-	sudo rm -rf /github/actions-runner/_work/local-storage/local-storage/_build
