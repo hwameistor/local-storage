@@ -22,9 +22,9 @@ jobs:
   pull_request-e2e-test:
     runs-on: ["self-hosted"]
     steps:
-      - name: Checkout
+      - name: delete
         run: |
-          rm -rf "/github/actions-runner/_work/local-storage/local-storage/_build"
+          sudo rm -rf "/github/actions-runner/_work/local-storage/local-storage/_build"
       - name: Checkout
         uses: actions/checkout@v2
         with:
