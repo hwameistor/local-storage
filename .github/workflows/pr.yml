@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: delete
         run: |
-          make e2e-delete
+          sudo rm -rf /github/actions-runner/_work/local-storage/local-storage/_build
       - name: Checkout
         uses: actions/checkout@v2
         with:
