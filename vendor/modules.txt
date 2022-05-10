@@ -201,8 +201,6 @@ golang.org/x/text/unicode/norm
 # golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 ## explicit
 golang.org/x/time/rate
-# golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-## explicit; go 1.11
 # gomodules.xyz/jsonpatch/v2 v2.0.1
 ## explicit; go 1.12
 gomodules.xyz/jsonpatch/v2
