@@ -15,12 +15,13 @@ func Test_linuxMounter_GetDeviceMountPoints(t *testing.T) {
 	defer ctrl.Finish()
 
 	var devPath string = "/dev/sdb"
+	var res []string
 
 	m := NewMockMounter(ctrl)
 	m.
 		EXPECT().
 		GetDeviceMountPoints(devPath).
-		Return(m).
+		Return(res).
 		Times(1)
 
 	v := m.GetDeviceMountPoints(devPath)
@@ -43,7 +44,7 @@ func Test_linuxMounter_Unmount(t *testing.T) {
 	m.
 		EXPECT().
 		Unmount(mountPoint).
-		Return(m).
+		Return(nil).
 		Times(1)
 
 	v := m.Unmount(mountPoint)
@@ -64,10 +65,11 @@ func Test_linuxMounter_BindMount(t *testing.T) {
 	var devPath string = "/dev/sdb"
 
 	m := NewMockMounter(ctrl)
+	var err error
 	m.
 		EXPECT().
 		BindMount(devPath, mountPoint).
-		Return(m).
+		Return(err).
 		Times(1)
 
 	v := m.BindMount(devPath, mountPoint)
@@ -87,11 +89,13 @@ func Test_linuxMounter_MountRawBlock(t *testing.T) {
 	var mountPoint string = "/dev/tmp"
 	var devPath string = "/dev/sdb"
 
+	var err error
+
 	m := NewMockMounter(ctrl)
 	m.
 		EXPECT().
 		MountRawBlock(devPath, mountPoint).
-		Return(m).
+		Return(err).
 		Times(1)
 
 	v := m.MountRawBlock(devPath, mountPoint)
@@ -117,7 +121,7 @@ func Test_linuxMounter_FormatAndMount(t *testing.T) {
 	m.
 		EXPECT().
 		FormatAndMount(devPath, mountPoint, fsType, options).
-		Return(m).
+		Return(nil).
 		Times(1)
 
 	v := m.FormatAndMount(devPath, mountPoint, fsType, options)

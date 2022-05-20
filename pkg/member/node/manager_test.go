@@ -4,12 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
-	"github.com/hwameistor/local-storage/pkg/common"
-	"github.com/hwameistor/local-storage/pkg/member/node/diskmonitor"
 	"github.com/hwameistor/local-storage/pkg/member/node/storage"
-	log "github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
 )
 
@@ -32,7 +27,7 @@ func Test_manager_ReconcileVolumeReplica(t *testing.T) {
 	m.
 		EXPECT().
 		ReconcileVolumeReplica(localVolumeReplica).
-		Return(m).
+		Return().
 		Times(1)
 
 	m.ReconcileVolumeReplica(localVolumeReplica)
@@ -40,51 +35,21 @@ func Test_manager_ReconcileVolumeReplica(t *testing.T) {
 }
 
 func Test_manager_Run(t *testing.T) {
-	type fields struct {
-		name                    string
-		namespace               string
-		apiClient               client.Client
-		informersCache          cache.Cache
-		replicaRecords          map[string]string
-		storageMgr              *storage.LocalManager
-		diskEventQueue          *diskmonitor.EventQueue
-		volumeTaskQueue         *common.TaskQueue
-		volumeReplicaTaskQueue  *common.TaskQueue
-		localDiskClaimTaskQueue *common.TaskQueue
-		localDiskTaskQueue      *common.TaskQueue
-		configManager           *configManager
-		logger                  *log.Entry
-	}
-	type args struct {
-		stopCh <-chan struct{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &manager{
-				name:                    tt.fields.name,
-				namespace:               tt.fields.namespace,
-				apiClient:               tt.fields.apiClient,
-				informersCache:          tt.fields.informersCache,
-				replicaRecords:          tt.fields.replicaRecords,
-				storageMgr:              tt.fields.storageMgr,
-				diskEventQueue:          tt.fields.diskEventQueue,
-				volumeTaskQueue:         tt.fields.volumeTaskQueue,
-				volumeReplicaTaskQueue:  tt.fields.volumeReplicaTaskQueue,
-				localDiskClaimTaskQueue: tt.fields.localDiskClaimTaskQueue,
-				localDiskTaskQueue:      tt.fields.localDiskTaskQueue,
-				configManager:           tt.fields.configManager,
-				logger:                  tt.fields.logger,
-			}
-			m.Run(tt.args.stopCh)
-		})
-	}
+	// 创建gomock控制器，用来记录后续的操作信息
+	ctrl := gomock.NewController(t)
+	// 断言期望的方法都被执行
+	// Go1.14+的单测中不再需要手动调用该方法
+	defer ctrl.Finish()
+
+	var stopCh <-chan struct{}
+	m := NewMockNodeManager(ctrl)
+	m.
+		EXPECT().
+		Run(stopCh).
+		Return().
+		Times(1)
+
+	m.Run(stopCh)
 }
 
 func Test_manager_Storage(t *testing.T) {
@@ -95,11 +60,13 @@ func Test_manager_Storage(t *testing.T) {
 	// Go1.14+的单测中不再需要手动调用该方法
 	defer ctrl.Finish()
 
+	var lm = &storage.LocalManager{}
+
 	m := NewMockNodeManager(ctrl)
 	m.
 		EXPECT().
 		Storage().
-		Return(m).
+		Return(lm).
 		Times(1)
 
 	v := m.Storage()
@@ -127,7 +94,7 @@ func Test_manager_TakeVolumeReplicaTaskAssignment(t *testing.T) {
 	m.
 		EXPECT().
 		TakeVolumeReplicaTaskAssignment(vol).
-		Return(m).
+		Return().
 		Times(1)
 
 	m.TakeVolumeReplicaTaskAssignment(vol)

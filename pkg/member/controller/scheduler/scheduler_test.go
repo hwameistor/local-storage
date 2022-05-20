@@ -22,11 +22,13 @@ func Test_scheduler_Allocate(t *testing.T) {
 	vol.Spec.PoolName = "pool1"
 	vol.Spec.Accessibility.Node = "node1"
 
+	var vc = &apisv1alpha1.VolumeConfig{}
+
 	m := NewMockScheduler(ctrl)
 	m.
 		EXPECT().
 		Allocate(vol).
-		Return(m).
+		Return(vc, nil).
 		Times(1)
 
 	v, err := m.Allocate(vol)
@@ -50,11 +52,13 @@ func Test_scheduler_GetNodeCandidates(t *testing.T) {
 	vol.Spec.PoolName = "pool1"
 	vol.Spec.Accessibility.Node = "node1"
 
+	var lsns = []*apisv1alpha1.LocalStorageNode{}
+
 	m := NewMockScheduler(ctrl)
 	m.
 		EXPECT().
 		GetNodeCandidates(vol).
-		Return(m).
+		Return(lsns, nil).
 		Times(1)
 
 	v, err := m.GetNodeCandidates(vol)
@@ -74,7 +78,7 @@ func Test_scheduler_Init(t *testing.T) {
 	m.
 		EXPECT().
 		Init().
-		Return(m).
+		Return().
 		Times(1)
 
 	m.Init()

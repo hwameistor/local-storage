@@ -1,10 +1,10 @@
 package csi
 
 import (
+	csi "github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/hwameistor/local-storage/pkg/apis"
 	"github.com/hwameistor/local-storage/pkg/exechelper"
 	"github.com/hwameistor/local-storage/pkg/exechelper/nsexecutor"
-	csi "github.com/container-storage-interface/spec/lib/go/csi"
 	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -13,6 +13,7 @@ const (
 	driverVersion = "1.0"
 )
 
+//go:generate mockgen -source=plugin.go -destination=plugin_mock.go  -package=csi
 // Driver interface
 type Driver interface {
 	Run(stopCh <-chan struct{})

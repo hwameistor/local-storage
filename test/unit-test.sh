@@ -3,7 +3,7 @@
 set -x
 
 # prepare output directory
-COVERPKGS=( ./pkg/member/... ./pkg/controller/... ./pkg/common/... ./pkg/apis/... ./pkg/exechelper/... ./pkg/utils/... )
+COVERPKGS=( ./pkg/member/... ./pkg/controller/... ./pkg/utils/... )
 tmp=$(mktemp -d)
 merge="${tmp}/merge.out"
 [ -f ${merge} ] && rm -f ${merge}

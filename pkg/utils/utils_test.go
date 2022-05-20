@@ -32,8 +32,13 @@ func TestBuildStoragePoolName(t *testing.T) {
 		poolClass string
 		poolType  string
 	}
-	var poolClass = apisv1alpha1.DiskClassNameHDD
+	var poolClass1 = apisv1alpha1.DiskClassNameHDD
 	var poolType = apisv1alpha1.PoolTypeRegular
+
+	var poolClass2 = apisv1alpha1.DiskClassNameSSD
+	var poolClass3 = apisv1alpha1.DiskClassNameNVMe
+	var poolClass4 = ""
+
 	tests := []struct {
 		name    string
 		args    args
@@ -41,9 +46,24 @@ func TestBuildStoragePoolName(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			args:    args{poolClass: poolClass, poolType: poolType},
+			args:    args{poolClass: poolClass1, poolType: poolType},
 			want:    apisv1alpha1.PoolNameForHDD,
 			wantErr: false,
+		},
+		{
+			args:    args{poolClass: poolClass2, poolType: poolType},
+			want:    apisv1alpha1.PoolNameForSSD,
+			wantErr: false,
+		},
+		{
+			args:    args{poolClass: poolClass3, poolType: poolType},
+			want:    apisv1alpha1.PoolNameForNVMe,
+			wantErr: false,
+		},
+		{
+			args:    args{poolClass: poolClass4, poolType: poolType},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -153,7 +173,7 @@ func TestSanitizeName(t *testing.T) {
 	}{
 		{
 			args: args{name: name},
-			want: "a-b-c-d-e",
+			want: "abcde",
 		},
 	}
 	for _, tt := range tests {

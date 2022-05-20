@@ -9,6 +9,7 @@ func TestConvertLVMBytesToNumeric(t *testing.T) {
 		lvmbyte string
 	}
 	var lvmb = "10240B"
+	var lvmb2 = "10240"
 	tests := []struct {
 		name    string
 		args    args
@@ -19,6 +20,11 @@ func TestConvertLVMBytesToNumeric(t *testing.T) {
 			args:    args{lvmbyte: lvmb},
 			want:    10240,
 			wantErr: false,
+		},
+		{
+			args:    args{lvmbyte: lvmb2},
+			want:    0,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -40,6 +46,8 @@ func TestConvertNumericToLVMBytes(t *testing.T) {
 		num int64
 	}
 	var num = int64(4194305)
+	var num2 = int64(0)
+
 	tests := []struct {
 		name string
 		args args
@@ -47,7 +55,11 @@ func TestConvertNumericToLVMBytes(t *testing.T) {
 	}{
 		{
 			args: args{num: num},
-			want: "5242880B",
+			want: "8388608B",
+		},
+		{
+			args: args{num: num2},
+			want: "0",
 		},
 	}
 	for _, tt := range tests {
@@ -64,6 +76,8 @@ func TestNumericToLVMBytes(t *testing.T) {
 		bytes int64
 	}
 	var num = int64(4194305)
+	var num2 = int64(4)
+
 	tests := []struct {
 		name string
 		args args
@@ -71,7 +85,11 @@ func TestNumericToLVMBytes(t *testing.T) {
 	}{
 		{
 			args: args{bytes: num},
-			want: 5242880,
+			want: 8388608,
+		},
+		{
+			args: args{bytes: num2},
+			want: 4194304,
 		},
 	}
 	for _, tt := range tests {

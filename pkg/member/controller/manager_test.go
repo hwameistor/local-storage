@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/hwameistor/local-storage/pkg/apis"
 	"github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
+	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/pkg/common"
 	"github.com/hwameistor/local-storage/pkg/member/controller/scheduler"
 	log "github.com/sirupsen/logrus"
