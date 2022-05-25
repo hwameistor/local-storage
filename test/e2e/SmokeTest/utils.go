@@ -265,6 +265,7 @@ func createLdc(ctx context.Context) error {
 			if localDiskClaim.Status.Status != ldv1.LocalDiskClaimStatusBound {
 				return false, nil
 			}
+			myLdc = make(map[string]*ldv1.LocalDiskClaim)
 			myLdc[nodes.Name] = localDiskClaim
 		}
 		return true, nil
