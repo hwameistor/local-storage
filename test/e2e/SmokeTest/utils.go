@@ -92,6 +92,8 @@ func installHwameiStorByHelm() {
 }
 
 func configureEnvironment(ctx context.Context) bool {
+	output := runInLinux("sh rollback.sh")
+	logrus.Info("rollback :", output)
 	installHwameiStorByHelm()
 	addLabels()
 	f := framework.NewDefaultFramework(lsv1.AddToScheme)
