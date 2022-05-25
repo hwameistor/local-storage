@@ -181,7 +181,7 @@ func configureEnvironment(ctx context.Context) bool {
 	case <-ch:
 		logrus.Infof("Components are ready ")
 		return true
-	case <-time.After(5 * time.Minute):
+	case <-time.After(8 * time.Minute):
 		logrus.Error("timeout")
 		return false
 
