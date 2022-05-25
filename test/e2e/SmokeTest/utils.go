@@ -242,6 +242,7 @@ func createLdc(ctx context.Context) error {
 		}
 	} else {
 		for _, ldc := range myLdc {
+			logrus.Printf("%+v", ldc)
 			err := client.Create(ctx, ldc)
 			if err != nil {
 				logrus.Printf("Create LDC failed ：%+v ", err)
