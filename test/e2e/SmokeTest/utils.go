@@ -212,31 +212,43 @@ func uninstallHelm() {
 
 }
 
+var myLdc map[string]*ldv1.LocalDiskClaim
+
 func createLdc(ctx context.Context) error {
+
 	logrus.Printf("create ldc for each node")
 	nodelist := nodeList()
 	f := framework.NewDefaultFramework(ldapis.AddToScheme)
 	client := f.GetClient()
-	for _, nodes := range nodelist.Items {
-		exmlocalDiskClaim := &ldv1.LocalDiskClaim{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "localdiskclaim-" + nodes.Name,
-				Namespace: "kube-system",
-			},
-			Spec: ldv1.LocalDiskClaimSpec{
-				NodeName: nodes.Name,
-				Description: ldv1.DiskClaimDescription{
-					DiskType: "HDD",
+	if myLdc == nil {
+		for _, nodes := range nodelist.Items {
+			exmlocalDiskClaim := &ldv1.LocalDiskClaim{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "localdiskclaim-" + nodes.Name,
+					Namespace: "kube-system",
 				},
-			},
+				Spec: ldv1.LocalDiskClaimSpec{
+					NodeName: nodes.Name,
+					Description: ldv1.DiskClaimDescription{
+						DiskType: "HDD",
+					},
+				},
+			}
+			err := client.Create(ctx, exmlocalDiskClaim)
+			if err != nil {
+				logrus.Printf("Create LDC failed ：%+v ", err)
+				f.ExpectNoError(err)
+			}
 		}
-		err := client.Create(ctx, exmlocalDiskClaim)
-		if err != nil {
-			logrus.Printf("Create LDC failed ：%+v ", err)
-			f.ExpectNoError(err)
+	} else {
+		for _, ldc := range myLdc {
+			err := client.Create(ctx, ldc)
+			if err != nil {
+				logrus.Printf("Create LDC failed ：%+v ", err)
+				f.ExpectNoError(err)
+			}
 		}
 	}
-
 	err := wait.PollImmediate(3*time.Second, 3*time.Minute, func() (done bool, err error) {
 		for _, nodes := range nodelist.Items {
 			time.Sleep(3 * time.Second)
@@ -253,6 +265,7 @@ func createLdc(ctx context.Context) error {
 			if localDiskClaim.Status.Status != ldv1.LocalDiskClaimStatusBound {
 				return false, nil
 			}
+			myLdc[nodes.Name] = localDiskClaim
 		}
 		return true, nil
 	})
