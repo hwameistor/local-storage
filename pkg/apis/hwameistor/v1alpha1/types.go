@@ -39,6 +39,7 @@ const (
 	OperationStateToBeAborted State = "ToBeAborted"
 	OperationStateAborting    State = "Cancelled"
 	OperationStateAborted     State = "Aborted"
+	OperationStateFailed      State = "Failed"
 
 	DiskStateAvailable State = "Available"
 	DiskStateInUse     State = "InUse"
@@ -206,4 +207,25 @@ type SystemConfig struct {
 	Mode             SystemMode        `json:"mode"`
 	DRBD             *DRBDSystemConfig `json:"drbd"`
 	MaxHAVolumeCount int               `json:"maxVolumeCount"`
+}
+
+type VolumeGroupManager interface {
+	Init(stopCh <-chan struct{})
+	ReconcileVolumeGroup(volGroup *LocalVolumeGroup)
+	GetLocalVolumeGroupByName(nameSpace, lvgName string) (*LocalVolumeGroup, error)
+	GetLocalVolumeGroupByLocalVolume(nameSpace, lvName string) (*LocalVolumeGroup, error)
+	GetLocalVolumeGroupByPVC(pvcName string, pvcNamespace string) (*LocalVolumeGroup, error)
+}
+
+// todo:
+// 1. structure/architecture optimize, plugin register, default plugins.
+// 		need so much more thinking!!!
+
+// VolumeScheduler interface
+type VolumeScheduler interface {
+	Init()
+	// schedule will schedule all replicas, and generate a valid VolumeConfig
+	Allocate(vol *LocalVolume) (*VolumeConfig, error)
+
+	GetNodeCandidates(vols []*LocalVolume) []*LocalStorageNode
 }

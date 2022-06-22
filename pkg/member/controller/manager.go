@@ -2,11 +2,13 @@ package controller
 
 import (
 	"context"
+	"sync"
 
 	"github.com/hwameistor/local-storage/pkg/apis"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/pkg/common"
 	"github.com/hwameistor/local-storage/pkg/member/controller/scheduler"
+	"github.com/hwameistor/local-storage/pkg/member/controller/volumegroup"
 	"github.com/hwameistor/local-storage/pkg/utils"
 
 	log "github.com/sirupsen/logrus"
@@ -35,7 +37,9 @@ type manager struct {
 
 	scheme *runtime.Scheme
 
-	volumeScheduler scheduler.Scheduler
+	volumeScheduler apisv1alpha1.VolumeScheduler
+
+	volumeGroupManager apisv1alpha1.VolumeGroupManager
 
 	nodeTaskQueue *common.TaskQueue
 
@@ -47,35 +51,46 @@ type manager struct {
 
 	volumeMigrateTaskQueue *common.TaskQueue
 
+	volumeGroupMigrateTaskQueue *common.TaskQueue
+
 	volumeConvertTaskQueue *common.TaskQueue
+
+	volumeGroupConvertTaskQueue *common.TaskQueue
 
 	localNodes map[string]apisv1alpha1.State // nodeName -> status
 
 	logger *log.Entry
+
+	lock sync.Mutex
 }
 
 // New cluster manager
 func New(name string, namespace string, cli client.Client, scheme *runtime.Scheme, informersCache runtimecache.Cache, systemConfig apisv1alpha1.SystemConfig) (apis.ControllerManager, error) {
 
 	return &manager{
-		name:                   name,
-		namespace:              namespace,
-		apiClient:              cli,
-		informersCache:         informersCache,
-		scheme:                 scheme,
-		volumeScheduler:        scheduler.New(cli, informersCache, systemConfig.MaxHAVolumeCount),
-		nodeTaskQueue:          common.NewTaskQueue("NodeTask", maxRetries),
-		k8sNodeTaskQueue:       common.NewTaskQueue("K8sNodeTask", maxRetries),
-		volumeTaskQueue:        common.NewTaskQueue("VolumeTask", maxRetries),
-		volumeExpandTaskQueue:  common.NewTaskQueue("VolumeExpandTask", maxRetries),
-		volumeMigrateTaskQueue: common.NewTaskQueue("VolumeMigrateTask", maxRetries),
-		volumeConvertTaskQueue: common.NewTaskQueue("VolumeConvertTask", maxRetries),
-		localNodes:             map[string]apisv1alpha1.State{},
-		logger:                 log.WithField("Module", "ControllerManager"),
+		name:                        name,
+		namespace:                   namespace,
+		apiClient:                   cli,
+		informersCache:              informersCache,
+		scheme:                      scheme,
+		volumeScheduler:             scheduler.New(cli, informersCache, systemConfig.MaxHAVolumeCount),
+		volumeGroupManager:          volumegroup.NewManager(cli, informersCache),
+		nodeTaskQueue:               common.NewTaskQueue("NodeTask", maxRetries),
+		k8sNodeTaskQueue:            common.NewTaskQueue("K8sNodeTask", maxRetries),
+		volumeTaskQueue:             common.NewTaskQueue("VolumeTask", maxRetries),
+		volumeExpandTaskQueue:       common.NewTaskQueue("VolumeExpandTask", maxRetries),
+		volumeMigrateTaskQueue:      common.NewTaskQueue("VolumeMigrateTask", maxRetries),
+		volumeGroupMigrateTaskQueue: common.NewTaskQueue("VolumeGroupMigrateTask", maxRetries),
+		volumeConvertTaskQueue:      common.NewTaskQueue("VolumeConvertTask", maxRetries),
+		volumeGroupConvertTaskQueue: common.NewTaskQueue("VolumeGroupConvertTask", maxRetries),
+		localNodes:                  map[string]apisv1alpha1.State{},
+		logger:                      log.WithField("Module", "ControllerManager"),
 	}, nil
 }
 
 func (m *manager) Run(stopCh <-chan struct{}) {
+
+	m.volumeGroupManager.Init(stopCh)
 
 	go m.start(stopCh)
 }
@@ -94,7 +109,9 @@ func (m *manager) start(stopCh <-chan struct{}) {
 
 		go m.startVolumeExpandTaskWorker(stopCh)
 		go m.startVolumeMigrateTaskWorker(stopCh)
+		go m.startVolumeGroupMigrateTaskWorker(stopCh)
 		go m.startVolumeConvertTaskWorker(stopCh)
+		go m.startVolumeGroupConvertTaskWorker(stopCh)
 
 		go m.startK8sNodeTaskWorker(stopCh)
 
@@ -148,6 +165,16 @@ func (m *manager) setupInformers() {
 	})
 }
 
+// VolumeScheduler retrieve the volume scheduler instance
+func (m *manager) VolumeScheduler() apisv1alpha1.VolumeScheduler {
+	return m.volumeScheduler
+}
+
+// VolumeGroupManager retrieves the volume group manager instance
+func (m *manager) VolumeGroupManager() apisv1alpha1.VolumeGroupManager {
+	return m.volumeGroupManager
+}
+
 // ReconcileNode reconciles Node CRD for any node resource change
 func (m *manager) ReconcileNode(node *apisv1alpha1.LocalStorageNode) {
 	m.nodeTaskQueue.Add(node.Name)
@@ -158,14 +185,24 @@ func (m *manager) ReconcileVolume(vol *apisv1alpha1.LocalVolume) {
 	m.volumeTaskQueue.Add(vol.Name)
 }
 
+// ReconcileVolumeGroup reconciles VolumeGroup CRD for any volume resource change
+func (m *manager) ReconcileVolumeGroup(volGroup *apisv1alpha1.LocalVolumeGroup) {
+	m.volumeGroupManager.ReconcileVolumeGroup(volGroup)
+}
+
 // ReconcileVolumeExpand reconciles VolumeExpand CRD for any volume resource change
 func (m *manager) ReconcileVolumeExpand(expand *apisv1alpha1.LocalVolumeExpand) {
 	m.volumeExpandTaskQueue.Add(expand.Name)
 }
 
 // ReconcileVolumeMigrate reconciles VolumeMigrate CRD for any volume resource change
-func (m *manager) ReconcileVolumeMigrate(expand *apisv1alpha1.LocalVolumeMigrate) {
-	m.volumeMigrateTaskQueue.Add(expand.Name)
+func (m *manager) ReconcileVolumeMigrate(migrate *apisv1alpha1.LocalVolumeMigrate) {
+	m.volumeMigrateTaskQueue.Add(migrate.Name)
+}
+
+// ReconcileVolumeGroupMigrate reconciles VolumeGroupMigrate CRD for any localvolumegroup resource change
+func (m *manager) ReconcileVolumeGroupMigrate(lvgmigrate *apisv1alpha1.LocalVolumeGroupMigrate) {
+	m.volumeGroupMigrateTaskQueue.Add(lvgmigrate.Name)
 }
 
 // ReconcileVolumeConvert reconciles VolumeConvert CRD for any volume resource change
@@ -173,8 +210,9 @@ func (m *manager) ReconcileVolumeConvert(convert *apisv1alpha1.LocalVolumeConver
 	m.volumeConvertTaskQueue.Add(convert.Name)
 }
 
-// ReconcileVolumeGroup reconciles VolumeGroup CRD for any volume resource change
-func (m *manager) ReconcileVolumeGroup(convert *apisv1alpha1.LocalVolumeGroup) {
+// ReconcileVolumeGroupConvert reconciles VolumeGroupConvert CRD for any volumegroup resource change
+func (m *manager) ReconcileVolumeGroupConvert(lvgconvert *apisv1alpha1.LocalVolumeGroupConvert) {
+	m.volumeGroupConvertTaskQueue.Add(lvgconvert.Name)
 }
 
 func (m *manager) handleK8sNodeUpdatedEvent(oldObj, newObj interface{}) {
@@ -231,10 +269,11 @@ func (m *manager) handleVolumeExpandCRDDeletedEvent(obj interface{}) {
 func (m *manager) handleVolumeMigrateCRDDeletedEvent(obj interface{}) {
 	instance, _ := obj.(*apisv1alpha1.LocalVolumeMigrate)
 	m.logger.WithFields(log.Fields{"migrate": instance.Name, "spec": instance.Spec, "status": instance.Status}).Info("Observed a VolumeMigrate CRD deletion...")
-	if instance.Status.State != apisv1alpha1.OperationStateCompleted && instance.Status.State != apisv1alpha1.OperationStateAborted {
+	if instance.Spec.Abort != true && instance.Status.State != apisv1alpha1.OperationStateCompleted && instance.Status.State != apisv1alpha1.OperationStateAborted {
 		// must be deleted by a mistake, rebuild it
 		// TODO: need retry considering the case of creating failure
 		newInstance := &apisv1alpha1.LocalVolumeMigrate{}
+		newInstance.Namespace = instance.Namespace
 		newInstance.Name = instance.Name
 		newInstance.Spec = instance.Spec
 

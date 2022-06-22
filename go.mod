@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/container-storage-interface/spec v1.3.0
+	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.7.3
 	github.com/hwameistor/local-disk-manager v0.1.0
@@ -53,6 +54,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.10.0 // indirect
 	github.com/prometheus/procfs v0.1.3 // indirect
+	github.com/wxnacy/wgo v1.0.4 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
