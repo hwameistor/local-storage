@@ -5,7 +5,6 @@ import (
 	"github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/pkg/common"
-	"github.com/hwameistor/local-storage/pkg/member/controller/scheduler"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"reflect"
@@ -52,7 +51,7 @@ func Test_manager_ReconcileNode(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -102,7 +101,7 @@ func Test_manager_ReconcileVolume(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -152,7 +151,7 @@ func Test_manager_ReconcileVolumeConvert(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -202,7 +201,7 @@ func Test_manager_ReconcileVolumeExpand(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -252,7 +251,7 @@ func Test_manager_ReconcileVolumeGroup(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -302,7 +301,7 @@ func Test_manager_ReconcileVolumeMigrate(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -352,7 +351,7 @@ func Test_manager_Run(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -402,7 +401,7 @@ func Test_manager_handleK8sNodeUpdatedEvent(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -453,7 +452,7 @@ func Test_manager_handleVolumeCRDDeletedEvent(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -503,7 +502,7 @@ func Test_manager_handleVolumeExpandCRDDeletedEvent(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -553,7 +552,7 @@ func Test_manager_handleVolumeMigrateCRDDeletedEvent(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -603,7 +602,7 @@ func Test_manager_setupInformers(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue
@@ -649,7 +648,7 @@ func Test_manager_start(t *testing.T) {
 		apiClient              client.Client
 		informersCache         cache.Cache
 		scheme                 *runtime.Scheme
-		volumeScheduler        scheduler.Scheduler
+		volumeScheduler        apisv1alpha1.VolumeScheduler
 		nodeTaskQueue          *common.TaskQueue
 		k8sNodeTaskQueue       *common.TaskQueue
 		volumeTaskQueue        *common.TaskQueue

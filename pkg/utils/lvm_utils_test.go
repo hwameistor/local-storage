@@ -59,13 +59,13 @@ func TestConvertNumericToLVMBytes(t *testing.T) {
 		},
 		{
 			args: args{num: num2},
-			want: "0",
+			want: "4194304B",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := ConvertNumericToLVMBytes(tt.args.num); got != tt.want {
-				t.Errorf("ConvertNumericToLVMBytes() = %v, want %v", got, tt.want)
+				t.Errorf("ConvertNumericToLVMBytes() = %v, want %v, tt.num = %v", got, tt.want, tt.args.num)
 			}
 		})
 	}

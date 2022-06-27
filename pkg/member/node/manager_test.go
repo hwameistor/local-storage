@@ -88,7 +88,7 @@ func Test_manager_TakeVolumeReplicaTaskAssignment(t *testing.T) {
 	vol.Namespace = "test1"
 	vol.Spec.RequiredCapacityBytes = 1240
 	vol.Spec.PoolName = "pool1"
-	vol.Spec.Accessibility.Node = "node1"
+	vol.Spec.Accessibility.Nodes = []string{"node1"}
 
 	m := NewMockNodeManager(ctrl)
 	m.

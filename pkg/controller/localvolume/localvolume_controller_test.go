@@ -28,6 +28,7 @@ var (
 	fakeLocalVolumeName          = "local-volume-example"
 	fakeLocalVolumeUID           = "local-volume-uid"
 	fakeNamespace                = "local-volume-test"
+	fakeNodenames                = []string{"10-6-118-10"}
 	fakeNodename                 = "10-6-118-10"
 	fakeStorageIp                = "10.6.118.11"
 	fakeZone                     = "zone-test"
@@ -121,7 +122,7 @@ func GenFakeLocalVolumeObject() *apisv1alpha1.LocalVolume {
 		Delete:                false,
 		Convertible:           true,
 		Accessibility: apisv1alpha1.AccessibilityTopology{
-			Node:    fakeNodename,
+			Nodes:   fakeNodenames,
 			Regions: []string{fakeRegion},
 			Zones:   []string{fakeZone},
 		},

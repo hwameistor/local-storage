@@ -85,6 +85,7 @@ func TestConvertBytesToStr(t *testing.T) {
 		size int64
 	}
 	var size = int64(1024)
+	var size1 = int64(0)
 	tests := []struct {
 		name string
 		args args
@@ -93,6 +94,10 @@ func TestConvertBytesToStr(t *testing.T) {
 		{
 			args: args{size: size},
 			want: "1024B",
+		},
+		{
+			args: args{size: size1},
+			want: "0B",
 		},
 	}
 	for _, tt := range tests {

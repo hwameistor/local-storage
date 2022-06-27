@@ -52,23 +52,23 @@ func TestNewLocalVolumeMigrateController(t *testing.T) {
 	}
 
 	// Create LocalVolumeMigrate
-	lsn := GenFakeLocalVolumeMigrateObject()
-	err := r.client.Create(context.Background(), lsn)
+	lvm := GenFakeLocalVolumeMigrateObject()
+	err := r.client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
 	}
-	defer r.DeleteFakeLocalVolumeMigrate(t, lsn)
+	defer r.DeleteFakeLocalVolumeMigrate(t, lvm)
 
-	// Get lsn
-	err = r.client.Get(context.Background(), types.NamespacedName{Namespace: lsn.GetNamespace(), Name: lsn.GetName()}, lsn)
+	// Get lvm
+	err = r.client.Get(context.Background(), types.NamespacedName{Namespace: lvm.GetNamespace(), Name: lvm.GetName()}, lvm)
 	if err != nil {
-		t.Errorf("Get lsn fail %v", err)
+		t.Errorf("Get lvm fail %v", err)
 	}
-	fmt.Printf("lsn = %+v", lsn)
+	fmt.Printf("lvm = %+v", lvm)
 	fmt.Printf("r.storageMember = %+v", r.storageMember)
 
 	// Mock LocalVolumeMigrate request
-	req := reconcile.Request{NamespacedName: types.NamespacedName{Namespace: lsn.GetNamespace(), Name: lsn.GetName()}}
+	req := reconcile.Request{NamespacedName: types.NamespacedName{Namespace: lvm.GetNamespace(), Name: lvm.GetName()}}
 	_, err = r.Reconcile(req)
 	if err != nil {
 		t.Errorf("Reconcile fail %v", err)
@@ -77,15 +77,15 @@ func TestNewLocalVolumeMigrateController(t *testing.T) {
 }
 
 // DeleteFakeLocalVolumeMigrate
-func (r *ReconcileLocalVolumeMigrate) DeleteFakeLocalVolumeMigrate(t *testing.T, lsn *apisv1alpha1.LocalVolumeMigrate) {
-	if err := r.client.Delete(context.Background(), lsn); err != nil {
-		t.Errorf("Delete LocalVolumeMigrate %v fail %v", lsn.GetName(), err)
+func (r *ReconcileLocalVolumeMigrate) DeleteFakeLocalVolumeMigrate(t *testing.T, lvm *apisv1alpha1.LocalVolumeMigrate) {
+	if err := r.client.Delete(context.Background(), lvm); err != nil {
+		t.Errorf("Delete LocalVolumeMigrate %v fail %v", lvm.GetName(), err)
 	}
 }
 
-// GenFakeLocalVolumeMigrateObject Create lsn request
+// GenFakeLocalVolumeMigrateObject Create lvm request
 func GenFakeLocalVolumeMigrateObject() *apisv1alpha1.LocalVolumeMigrate {
-	lsn := &apisv1alpha1.LocalVolumeMigrate{}
+	lvm := &apisv1alpha1.LocalVolumeMigrate{}
 
 	TypeMeta := metav1.TypeMeta{
 		Kind:       LocalVolumeMigrateKind,
@@ -133,17 +133,17 @@ func GenFakeLocalVolumeMigrateObject() *apisv1alpha1.LocalVolumeMigrate {
 		Volumes:                  volumes,
 	}
 
-	lsn.ObjectMeta = ObjectMata
-	lsn.TypeMeta = TypeMeta
-	lsn.Spec = Spec
-	lsn.Status.State = apisv1alpha1.VolumeStateCreating
-	return lsn
+	lvm.ObjectMeta = ObjectMata
+	lvm.TypeMeta = TypeMeta
+	lvm.Spec = Spec
+	lvm.Status.State = apisv1alpha1.VolumeStateCreating
+	return lvm
 }
 
 // CreateFakeClient Create LocalVolumeMigrate resource
 func CreateFakeClient() (client.Client, *runtime.Scheme) {
-	lsn := GenFakeLocalVolumeMigrateObject()
-	lsnList := &apisv1alpha1.LocalVolumeMigrateList{
+	lvm := GenFakeLocalVolumeMigrateObject()
+	lvmList := &apisv1alpha1.LocalVolumeMigrateList{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       LocalVolumeMigrateKind,
 			APIVersion: apiversion,
@@ -151,7 +151,7 @@ func CreateFakeClient() (client.Client, *runtime.Scheme) {
 	}
 
 	s := scheme.Scheme
-	s.AddKnownTypes(ldmv1alpha1.SchemeGroupVersion, lsn)
-	s.AddKnownTypes(ldmv1alpha1.SchemeGroupVersion, lsnList)
+	s.AddKnownTypes(ldmv1alpha1.SchemeGroupVersion, lvm)
+	s.AddKnownTypes(ldmv1alpha1.SchemeGroupVersion, lvmList)
 	return fake.NewFakeClientWithScheme(s), s
 }

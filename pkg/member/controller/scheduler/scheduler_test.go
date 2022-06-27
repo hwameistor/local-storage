@@ -20,11 +20,11 @@ func Test_scheduler_Allocate(t *testing.T) {
 	vol.Namespace = "test1"
 	vol.Spec.RequiredCapacityBytes = 1240
 	vol.Spec.PoolName = "pool1"
-	vol.Spec.Accessibility.Node = "node1"
+	vol.Spec.Accessibility.Nodes = []string{"node1"}
 
 	var vc = &apisv1alpha1.VolumeConfig{}
 
-	m := NewMockScheduler(ctrl)
+	m := NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
 		Allocate(vol).
@@ -45,24 +45,26 @@ func Test_scheduler_GetNodeCandidates(t *testing.T) {
 	// Go1.14+的单测中不再需要手动调用该方法
 	defer ctrl.Finish()
 
+	var volList []*apisv1alpha1.LocalVolume
 	var vol = &apisv1alpha1.LocalVolume{}
 	vol.Name = "vol1"
 	vol.Namespace = "test1"
 	vol.Spec.RequiredCapacityBytes = 1240
 	vol.Spec.PoolName = "pool1"
-	vol.Spec.Accessibility.Node = "node1"
+	vol.Spec.Accessibility.Nodes = []string{"node1"}
+	volList = append(volList, vol)
 
 	var lsns = []*apisv1alpha1.LocalStorageNode{}
 
-	m := NewMockScheduler(ctrl)
+	m := NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
 		GetNodeCandidates(vol).
 		Return(lsns, nil).
 		Times(1)
 
-	v, err := m.GetNodeCandidates(vol)
-	fmt.Printf("Test_scheduler_GetNodeCandidates v= %+v, err= %+v", v, err)
+	v := m.GetNodeCandidates(volList)
+	fmt.Printf("Test_scheduler_GetNodeCandidates v= %+v", v)
 
 }
 
@@ -74,7 +76,7 @@ func Test_scheduler_Init(t *testing.T) {
 	// Go1.14+的单测中不再需要手动调用该方法
 	defer ctrl.Finish()
 
-	m := NewMockScheduler(ctrl)
+	m := NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
 		Init().
