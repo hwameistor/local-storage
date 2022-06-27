@@ -77,7 +77,7 @@ github.com/hwameistor/local-disk-manager/pkg/filter
 github.com/hwameistor/local-disk-manager/pkg/localdisk
 github.com/hwameistor/local-disk-manager/pkg/utils
 github.com/hwameistor/local-disk-manager/pkg/utils/sys
-# github.com/hwameistor/reliable-helper-system v0.0.3
+# github.com/hwameistor/reliable-helper-system v0.0.6
 ## explicit; go 1.17
 github.com/hwameistor/reliable-helper-system/pkg/apis
 github.com/hwameistor/reliable-helper-system/pkg/apis/hwameistor/v1alpha1

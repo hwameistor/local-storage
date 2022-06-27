@@ -170,9 +170,15 @@ func (rdHandler *ReplaceDiskHandler) SetMigrateBackUpFailededVolumeNames(volumeN
 }
 
 // SetErrMsg
-func (rdHandler *ReplaceDiskHandler) SetErrMsg(errMsg string) *ReplaceDiskHandler {
-	rdHandler.ReplaceDisk.Status.ErrMsg = rdHandler.ReplaceDisk.Status.ErrMsg + "\n" + errMsg
-	return rdHandler
+func (rdHandler *ReplaceDiskHandler) SetErrMsg(errMsg string) error {
+	rdHandler.ReplaceDisk.Status.ErrMsg = errMsg
+	return rdHandler.Status().Update(context.Background(), &rdHandler.ReplaceDisk)
+}
+
+// SetWarnMsg
+func (rdHandler *ReplaceDiskHandler) SetWarnMsg(warnMsg string) error {
+	rdHandler.ReplaceDisk.Status.WarnMsg = warnMsg
+	return rdHandler.Status().Update(context.Background(), &rdHandler.ReplaceDisk)
 }
 
 // ReplaceDiskStage

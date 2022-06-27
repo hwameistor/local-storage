@@ -201,8 +201,8 @@ github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/hwameistor/local-disk-manager v0.1.0 h1:tJ/sKf8koyyrNIackJS9JfjkncPp6WeIdTnziAxXVYY=
 github.com/hwameistor/local-disk-manager v0.1.0/go.mod h1:0wq9bcLopREJG2xdiytZqOBxwuFnuTLLPBTvgWUdDJA=
-github.com/hwameistor/reliable-helper-system v0.0.3 h1:eocv2Atyz25cJyhLjhD1ycGX+9l4Ot+fd1kFI8GNaUM=
-github.com/hwameistor/reliable-helper-system v0.0.3/go.mod h1:OXjS+L6sFbBMp+jbKoo8UJmZOML97Fw3kkroIT22FXU=
+github.com/hwameistor/reliable-helper-system v0.0.6 h1:hWU9Lk+uwDm92RQhohaMF9nPm7IRmKj60Xfoep8qWQY=
+github.com/hwameistor/reliable-helper-system v0.0.6/go.mod h1:EVJ5jt0Y5+fG2ImdusycKpGmBwZTPB0/DqclnT2n2bo=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/imdario/mergo v0.3.5/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/imdario/mergo v0.3.9 h1:UauaLniWCFHWd+Jp9oCEkTBj8VO/9DKg3PV3VCNMDIg=

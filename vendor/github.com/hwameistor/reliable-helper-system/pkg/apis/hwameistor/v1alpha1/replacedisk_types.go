@@ -17,7 +17,11 @@ type ReplaceDiskSpec struct {
 	// NewUUID global unique identifier of the new replaced disk
 	NewUUID string `json:"newUuid,omitempty"`
 	// NodeName nodeName of the replaced disk
-	NodeName string `json:"nodeName,omitempty"`
+	NodeName    string `json:"nodeName,omitempty"`
+	DriverGroup string `json:"driverGroup,omitempty"`
+	CtrId       string `json:"ctrId,omitempty"`
+	SltId       string `json:"sltId,omitempty"`
+	EID         string `json:"eId,omitempty"`
 	// Init WaitDiskReplaced WaitSvcRestor Succeed
 	ReplaceDiskStage ReplaceDiskStage `json:"replaceDiskStage,omitempty"`
 	// IgnoreUnconvertibleVolumeData
@@ -82,6 +86,8 @@ type ReplaceDiskStatus struct {
 	MigrateBackUpFailededVolumeNames []string `json:"migrateBackUpFailededVolumeNames,omitempty"`
 	// ErrMsg errMsg of the replaced disk
 	ErrMsg string `json:"errMsg,omitempty"`
+	// WarnMsg warnMsg of the replaced disk
+	WarnMsg string `json:"warnMsg,omitempty"`
 }
 
 // ReplaceStatus defines the observed status of replacedDisk

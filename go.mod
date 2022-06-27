@@ -7,7 +7,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.7.3
 	github.com/hwameistor/local-disk-manager v0.1.0
-	github.com/hwameistor/reliable-helper-system v0.0.3
+	github.com/hwameistor/reliable-helper-system v0.0.6
 	github.com/kubernetes-csi/csi-lib-utils v0.7.1
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.17.0
