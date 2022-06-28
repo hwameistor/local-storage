@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
+	memmock "github.com/hwameistor/local-storage/pkg/member/controller"
 	"github.com/hwameistor/local-storage/pkg/member/node/storage"
 	"testing"
 )
@@ -23,7 +24,7 @@ func Test_manager_ReconcileVolumeReplica(t *testing.T) {
 	localVolumeReplica.Spec.RequiredCapacityBytes = 1240
 	localVolumeReplica.Name = "test1"
 
-	m := NewMockNodeManager(ctrl)
+	m := memmock.NewMockNodeManager(ctrl)
 	m.
 		EXPECT().
 		ReconcileVolumeReplica(localVolumeReplica).
@@ -42,7 +43,7 @@ func Test_manager_Run(t *testing.T) {
 	defer ctrl.Finish()
 
 	var stopCh <-chan struct{}
-	m := NewMockNodeManager(ctrl)
+	m := memmock.NewMockNodeManager(ctrl)
 	m.
 		EXPECT().
 		Run(stopCh).
@@ -62,7 +63,7 @@ func Test_manager_Storage(t *testing.T) {
 
 	var lm = &storage.LocalManager{}
 
-	m := NewMockNodeManager(ctrl)
+	m := memmock.NewMockNodeManager(ctrl)
 	m.
 		EXPECT().
 		Storage().
@@ -90,7 +91,7 @@ func Test_manager_TakeVolumeReplicaTaskAssignment(t *testing.T) {
 	vol.Spec.PoolName = "pool1"
 	vol.Spec.Accessibility.Nodes = []string{"node1"}
 
-	m := NewMockNodeManager(ctrl)
+	m := memmock.NewMockNodeManager(ctrl)
 	m.
 		EXPECT().
 		TakeVolumeReplicaTaskAssignment(vol).

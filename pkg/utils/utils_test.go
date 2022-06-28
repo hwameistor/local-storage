@@ -180,11 +180,53 @@ func TestSanitizeName(t *testing.T) {
 			args: args{name: name},
 			want: "abcde",
 		},
+		{
+			args: args{name: "a.b.c.d"},
+			want: "a-b-c-d",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := SanitizeName(tt.args.name); got != tt.want {
 				t.Errorf("SanitizeName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetNodeName(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		// TODO: Add test cases.
+		{
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetNodeName(); got != tt.want {
+				t.Errorf("GetNodeName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetNamespace(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		// TODO: Add test cases.
+		{
+			want: "test",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetNamespace(); got != tt.want {
+				t.Errorf("GetNamespace() = %v, want %v", got, tt.want)
 			}
 		})
 	}

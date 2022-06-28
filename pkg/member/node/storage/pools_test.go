@@ -148,3 +148,33 @@ func Test_getPoolNameAccordingDisk(t *testing.T) {
 		})
 	}
 }
+
+func Test_localPoolManager_GetReplicas(t *testing.T) {
+	var localVolumeReplicaM = map[string]*apisv1alpha.LocalVolumeReplica{}
+	var localVolumeReplica = &apisv1alpha.LocalVolumeReplica{}
+	localVolumeReplica.Spec.VolumeName = "volume1"
+	localVolumeReplica.Spec.PoolName = "pool1"
+	localVolumeReplica.Spec.NodeName = "node1"
+	localVolumeReplica.Spec.RequiredCapacityBytes = 1240
+	localVolumeReplica.Name = "test1"
+	localVolumeReplicaM["test"] = localVolumeReplica
+
+	// 创建gomock控制器，用来记录后续的操作信息
+	ctrl := gomock.NewController(t)
+	// 断言期望的方法都被执行
+	// Go1.14+的单测中不再需要手动调用该方法
+	defer ctrl.Finish()
+	m := NewMockLocalPoolManager(ctrl)
+	m.
+		EXPECT().
+		GetReplicas().
+		Return(localVolumeReplicaM, nil).
+		Times(1)
+
+	v, err := m.GetReplicas()
+	fmt.Printf("Test_localPoolManager_GetReplicas err = %+v", err)
+	if err != nil {
+		t.Fatal()
+	}
+	fmt.Printf("Test_localPoolManager_GetReplicas v= %+v", v)
+}

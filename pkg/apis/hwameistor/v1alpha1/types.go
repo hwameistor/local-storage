@@ -223,7 +223,7 @@ type VolumeGroupManager interface {
 // 		need so much more thinking!!!
 
 // VolumeScheduler interface
-//go:generate mockgen -source=types.go -destination=../../../member/controller/scheduler/scheduler_mock.go  -package=scheduler
+////go:generate mockgen -source=types.go -destination=../../../member/controller/scheduler/scheduler_mock.go  -package=scheduler
 type VolumeScheduler interface {
 	Init()
 	// schedule will schedule all replicas, and generate a valid VolumeConfig

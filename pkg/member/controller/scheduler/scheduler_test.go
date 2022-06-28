@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
+	vgmock "github.com/hwameistor/local-storage/pkg/member/controller/volumegroup"
 	"testing"
 )
 
@@ -24,7 +25,7 @@ func Test_scheduler_Allocate(t *testing.T) {
 
 	var vc = &apisv1alpha1.VolumeConfig{}
 
-	m := NewMockVolumeScheduler(ctrl)
+	m := vgmock.NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
 		Allocate(vol).
@@ -56,11 +57,11 @@ func Test_scheduler_GetNodeCandidates(t *testing.T) {
 
 	var lsns = []*apisv1alpha1.LocalStorageNode{}
 
-	m := NewMockVolumeScheduler(ctrl)
+	m := vgmock.NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
-		GetNodeCandidates(vol).
-		Return(lsns, nil).
+		GetNodeCandidates(volList).
+		Return(lsns).
 		Times(1)
 
 	v := m.GetNodeCandidates(volList)
@@ -76,7 +77,7 @@ func Test_scheduler_Init(t *testing.T) {
 	// Go1.14+的单测中不再需要手动调用该方法
 	defer ctrl.Finish()
 
-	m := NewMockVolumeScheduler(ctrl)
+	m := vgmock.NewMockVolumeScheduler(ctrl)
 	m.
 		EXPECT().
 		Init().
