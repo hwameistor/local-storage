@@ -69,9 +69,9 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 
 	// check replacedisk label exists
 	isInReplaceDiskTask, err := m.checkLocalDiskInReplaceDiskTaskByUUID(m.name, localDisk.Spec.UUID)
-	m.logger.Debugf("checkLocalDiskInReplaceDiskTaskByUUID isInReplaceDiskTask = %v, err = %v", isInReplaceDiskTask, err)
+	//m.logger.Debugf("checkLocalDiskInReplaceDiskTaskByUUID isInReplaceDiskTask = %v, err = %v", isInReplaceDiskTask, err)
 	if err != nil {
-		logCtx.Error("processLocalDisk checkLocalDiskInReplaceDiskTaskByUUID failed ,err = %v", err)
+		//logCtx.Error("processLocalDisk checkLocalDiskInReplaceDiskTaskByUUID failed ,err = %v", err)
 		return err
 	}
 	if !isInReplaceDiskTask {
@@ -100,7 +100,7 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 
 	switch localDisk.Status.State {
 	case ldmv1alpha1.LocalDiskUnclaimed:
-		logCtx.Debug("LocalDiskUnclaimed localDisk = %v...", localDisk)
+		//logCtx.Debug("LocalDiskUnclaimed localDisk = %v...", localDisk)
 		err := m.processReplacedLocalDisk(localDisk)
 		if err != nil {
 			return err
@@ -119,7 +119,7 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 		return nil
 
 	case ldmv1alpha1.LocalDiskReleased:
-		logCtx.Debug("LocalDiskReleased localDisk = %v...", localDisk)
+		//logCtx.Debug("LocalDiskReleased localDisk = %v...", localDisk)
 		err := m.processReplacedLocalDisk(localDisk)
 		if err != nil {
 			return err
@@ -129,6 +129,15 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 	case ldmv1alpha1.LocalDiskClaimed:
 		logCtx.Debug("LocalDiskClaimed ...")
 		return nil
+
+	case ldmv1alpha1.LocalDiskInUse:
+		logCtx.Debug("LocalDiskInUse ...")
+		return nil
+
+	case ldmv1alpha1.LocalDiskReserved:
+		logCtx.Debug("LocalDiskReserved ...")
+		return nil
+
 	default:
 		logCtx.Error("Invalid LocalDisk state")
 	}
@@ -137,7 +146,7 @@ func (m *manager) processLocalDisk(localDiskNameSpacedName string) error {
 }
 
 func (m *manager) convertLdmLocalDisk(ld *ldmv1alpha1.LocalDisk) []*apisv1alpha1.LocalDisk {
-	m.logger.Debug("convertLocalDisk start ld = %v...", ld)
+	//m.logger.Debug("convertLocalDisk start ld = %v...", ld)
 	if ld == nil {
 		return nil
 	}
@@ -164,7 +173,7 @@ func (m *manager) convertLdmLocalDisk(ld *ldmv1alpha1.LocalDisk) []*apisv1alpha1
 }
 
 func (m *manager) processReplacedLocalDisk(ld *ldmv1alpha1.LocalDisk) error {
-	m.logger.Debug("processReplacedLocalDisk start ld = %+v...", ld)
+	//m.logger.Debug("processReplacedLocalDisk start ld = %+v...", ld)
 
 	localDiskList := m.convertLdmLocalDisk(ld)
 	if err := m.storageMgr.PoolManager().ExtendPools(localDiskList); err != nil {
@@ -178,7 +187,7 @@ func (m *manager) processReplacedLocalDisk(ld *ldmv1alpha1.LocalDisk) error {
 		log.WithError(err).Error("Failed to getLocalDisksMapByLocalDiskClaim")
 		return err
 	}
-	m.logger.Debug("processReplacedLocalDisk getLocalDisksMapByLdmLocalDisk  localDisks = %v, ld = %v", localDisks, ld)
+	//m.logger.Debug("processReplacedLocalDisk getLocalDisksMapByLdmLocalDisk  localDisks = %v, ld = %v", localDisks, ld)
 
 	if err := m.storageMgr.Registry().SyncResourcesToNodeCRD(localDisks); err != nil {
 		log.WithError(err).Error("Failed to SyncResourcesToNodeCRD")
@@ -201,19 +210,19 @@ func (m *manager) getLocalDisksMapByLdmLocalDisk(ld *ldmv1alpha1.LocalDisk) (map
 }
 
 func (m *manager) checkLocalDiskInReplaceDiskTaskByUUID(nodeName, diskUuid string) (bool, error) {
-	m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID nodeName = %v, diskUuid = %v", nodeName, diskUuid)
+	//m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID nodeName = %v, diskUuid = %v", nodeName, diskUuid)
 	replaceDiskList, err := m.rdhandler.ListReplaceDisk()
 	if err != nil {
 		m.logger.WithError(err).Error("Failed to get ReplaceDiskList")
 		return false, err
 	}
-	m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID replaceDiskList %v", replaceDiskList)
+	//m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID replaceDiskList %v", replaceDiskList)
 	for _, replacedisk := range replaceDiskList.Items {
 		if replacedisk.Spec.NodeName == nodeName {
 			if replacedisk.Spec.ReplaceDiskStage != isapisv1alpha1.ReplaceDiskStage_Succeed && replacedisk.Spec.ReplaceDiskStage != isapisv1alpha1.ReplaceDiskStage_Failed {
 				oldDiskUuid := replacedisk.Spec.OldUUID
 				newDiskUuid := replacedisk.Spec.NewUUID
-				m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID oldDiskUuid = %v,==== replacename = %v, ====newDiskUuid = %v, diskUuid = %v", oldDiskUuid, replacedisk.Name, newDiskUuid, diskUuid)
+				//m.logger.Debug("checkLocalDiskInReplaceDiskTaskByUUID oldDiskUuid = %v,==== replacename = %v, ====newDiskUuid = %v, diskUuid = %v", oldDiskUuid, replacedisk.Name, newDiskUuid, diskUuid)
 				if diskUuid == oldDiskUuid || diskUuid == newDiskUuid {
 					return true, nil
 				}

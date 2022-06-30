@@ -20,6 +20,7 @@ const (
 )
 
 // LocalStorageMember interface
+////go:generate mockgen -source=member.go -destination=../member/member_mock.go  -package=member
 type LocalStorageMember interface {
 	Run(stopCh <-chan struct{})
 
@@ -47,8 +48,11 @@ type LocalStorageMember interface {
 }
 
 // ControllerManager interface
+//go:generate mockgen -source=member.go -destination=../member/controller/manager_mock.go  -package=controller
 type ControllerManager interface {
 	Run(stopCh <-chan struct{})
+
+	VolumeScheduler() apisv1alpha1.VolumeScheduler
 
 	VolumeGroupManager() apisv1alpha1.VolumeGroupManager
 
@@ -62,10 +66,15 @@ type ControllerManager interface {
 
 	ReconcileVolumeMigrate(migrate *apisv1alpha1.LocalVolumeMigrate)
 
+	ReconcileVolumeGroupMigrate(lvgmigrate *apisv1alpha1.LocalVolumeGroupMigrate)
+
 	ReconcileVolumeConvert(convert *apisv1alpha1.LocalVolumeConvert)
+
+	ReconcileVolumeGroupConvert(lvgconvert *apisv1alpha1.LocalVolumeGroupConvert)
 }
 
 // NodeManager interface
+////go:generate mockgen -source=member.go -destination=../member/node/manager_mock.go  -package=node
 type NodeManager interface {
 	Run(stopCh <-chan struct{})
 

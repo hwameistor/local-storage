@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"reflect"
+	"runtime"
 	"strings"
 )
 
@@ -54,4 +57,44 @@ func GetNamespace() string {
 // ConvertNodeName e.g.(10.23.10.12 => 10-23-10-12)
 func ConvertNodeName(node string) string {
 	return strings.Replace(node, ".", "-", -1)
+}
+
+func FuncName() string {
+	pc := make([]uintptr, 1)
+	runtime.Callers(2, pc)
+	f := runtime.FuncForPC(pc[0])
+	s := strings.Split(f.Name(), ".")
+	return s[len(s)-1]
+}
+
+func StructToMap(in interface{}, tagName string) map[string]interface{} {
+	out := make(map[string]interface{})
+
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		log.WithError(fmt.Errorf("ToMap only accepts struct or struct pointer; got %T", v))
+		return nil
+	}
+
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		fi := t.Field(i)
+		if tagValue := fi.Tag.Get(tagName); tagValue != "" {
+			out[tagValue] = v.Field(i).Interface()
+		}
+	}
+	return out
+}
+
+func StrFind(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
 }

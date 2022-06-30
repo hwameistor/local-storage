@@ -9,7 +9,7 @@ import (
 	"os"
 
 	ldmv1alpha1 "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
-	ldctr "github.com/hwameistor/local-disk-manager/pkg/controller/localdisk"
+	localdisk2 "github.com/hwameistor/local-disk-manager/pkg/handler/localdisk"
 	"github.com/hwameistor/local-storage/pkg/apis"
 	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/local-storage/pkg/common"
@@ -62,7 +62,7 @@ type manager struct {
 
 	configManager *configManager
 
-	ldhandler *ldctr.LocalDiskHandler
+	ldhandler *localdisk2.LocalDiskHandler
 
 	rdhandler *rdmgr.ReplaceDiskHandler
 
@@ -89,7 +89,7 @@ func New(name string, namespace string, cli client.Client, informersCache runtim
 		// healthCheckQueue:        common.NewTaskQueue("HealthCheckTask", maxRetries),
 		diskEventQueue: diskmonitor.NewEventQueue("DiskEvents"),
 		configManager:  configManager,
-		ldhandler:      ldctr.NewLocalDiskHandler(cli, recorder),
+		ldhandler:      localdisk2.NewLocalDiskHandler(cli, recorder),
 		rdhandler:      rdmgr.NewReplaceDiskHandler(cli, recorder),
 		logger:         log.WithField("Module", "NodeManager"),
 	}, nil

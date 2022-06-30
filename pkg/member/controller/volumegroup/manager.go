@@ -3,6 +3,7 @@ package volumegroup
 import (
 	"context"
 	"fmt"
+	"github.com/hwameistor/local-storage/pkg/utils"
 	"strings"
 	"sync"
 
@@ -27,7 +28,8 @@ type manager struct {
 	apiClient      client.Client
 	informersCache runtimecache.Cache
 
-	logger *log.Entry
+	logger    *log.Entry
+	nameSpace string
 
 	lock                  sync.Mutex
 	localVolumeGroupQueue *common.TaskQueue
@@ -62,6 +64,7 @@ func parseNamespacedName(nn string) (string, string) {
 func NewManager(cli client.Client, informersCache runtimecache.Cache) apisv1alpha1.VolumeGroupManager {
 	return &manager{
 		apiClient:                 cli,
+		nameSpace:                 utils.GetNamespace(),
 		informersCache:            informersCache,
 		localVolumeGroupQueue:     common.NewTaskQueue("VolumeGroupQueue", 0),
 		pvcQueue:                  common.NewTaskQueue("PVCQueue", 0),
@@ -120,31 +123,31 @@ func (m *manager) Init(stopCh <-chan struct{}) {
 
 }
 
-func (m *manager) GetLocalVolumeGroupByName(lvgName string) (*apisv1alpha1.LocalVolumeGroup, error) {
+func (m *manager) GetLocalVolumeGroupByName(ns, lvgName string) (*apisv1alpha1.LocalVolumeGroup, error) {
 	lvg := &apisv1alpha1.LocalVolumeGroup{}
 	err := m.apiClient.Get(
 		context.TODO(),
-		types.NamespacedName{Name: lvgName},
+		types.NamespacedName{Namespace: ns, Name: lvgName},
 		lvg)
 	return lvg, err
 }
 
-func (m *manager) GetLocalVolumeGroupByLocalVolume(lvName string) (*apisv1alpha1.LocalVolumeGroup, error) {
+func (m *manager) GetLocalVolumeGroupByLocalVolume(ns, lvName string) (*apisv1alpha1.LocalVolumeGroup, error) {
 	lvg := &apisv1alpha1.LocalVolumeGroup{}
 	err := m.apiClient.Get(
 		context.TODO(),
-		types.NamespacedName{Name: m.localVolumeToVolumeGroups[lvName]},
+		types.NamespacedName{Namespace: ns, Name: m.localVolumeToVolumeGroups[lvName]},
 		lvg)
 	return lvg, err
 }
 
-func (m *manager) GetLocalVolumeGroupByPVC(pvcName string, pvcNamespace string) (*apisv1alpha1.LocalVolumeGroup, error) {
-	lvg := &apisv1alpha1.LocalVolumeGroup{}
-	err := m.apiClient.Get(
-		context.TODO(),
-		types.NamespacedName{Name: m.pvcToVolumeGroups[namespacedName(pvcNamespace, pvcName)]},
-		lvg)
-	return lvg, err
+func (m *manager) GetLocalVolumeGroupByPVC(pvcNamespace string, pvcName string) (*apisv1alpha1.LocalVolumeGroup, error) {
+	lvg := apisv1alpha1.LocalVolumeGroup{}
+	lvgName := m.pvcToVolumeGroups[namespacedName(pvcNamespace, pvcName)]
+	if err := m.apiClient.Get(context.TODO(), types.NamespacedName{Name: lvgName}, &lvg); err != nil {
+		return nil, err
+	}
+	return &lvg, nil
 }
 
 func (m *manager) handleLocalVolumeEventAdd(obj interface{}) {
@@ -229,9 +232,9 @@ func (m *manager) isHwameiStorPod(pod *corev1.Pod) bool {
 			continue
 		}
 		pvc := &corev1.PersistentVolumeClaim{}
-		err := m.apiClient.Get(context.TODO(), types.NamespacedName{Name: vol.PersistentVolumeClaim.ClaimName}, pvc)
+		err := m.apiClient.Get(context.TODO(), types.NamespacedName{Namespace: pod.Namespace, Name: vol.PersistentVolumeClaim.ClaimName}, pvc)
 		if err != nil {
-			m.logger.WithFields(log.Fields{"namespace": pvc.Namespace, "pvc": pvc.Name}).WithError(err).Error("Failed to fetch PVC")
+			m.logger.WithFields(log.Fields{"namespace": pod.Namespace, "pvc": vol.PersistentVolumeClaim.ClaimName}).WithError(err).Error("Failed to fetch PVC")
 			continue
 		}
 		if m.isHwameiStorPVC(pvc) {
@@ -343,24 +346,31 @@ func (m *manager) ReconcileVolumeGroup(lvg *apisv1alpha1.LocalVolumeGroup) {
 	if lvg.DeletionTimestamp != nil {
 		// lvg is in Deleting state, waiting for finalizer to be clean up
 		if err := m.releaseLocalVolumeGroup(lvg); err != nil {
-			m.localVolumeGroupQueue.Add(lvg.Name)
+			m.localVolumeGroupQueue.Add(lvg.Namespace + "/" + lvg.Name)
 		}
 	} else if len(lvg.Spec.Volumes) == 0 {
 		// no pvc/lv associated with LVG, should delete it
 		if err := m.deleteLocalVolumeGroup(lvg); err != nil {
-			m.localVolumeGroupQueue.Add(lvg.Name)
+			m.localVolumeGroupQueue.Add(lvg.Namespace + "/" + lvg.Name)
 		}
 	} else {
 		// add or update LVG
 		if err := m.addLocalVolumeGroup(lvg); err != nil {
-			m.localVolumeGroupQueue.Add(lvg.Name)
+			m.localVolumeGroupQueue.Add(lvg.Namespace + "/" + lvg.Name)
 		}
 	}
 }
 
-func (m *manager) processLocalVolumeGroup(lvgName string) error {
+func (m *manager) processLocalVolumeGroup(lvgNamespacedName string) error {
 
-	lvg, err := m.GetLocalVolumeGroupByName(lvgName)
+	splitRes := strings.Split(lvgNamespacedName, "/")
+	var ns, lvgName string
+	if len(splitRes) >= 2 {
+		ns = splitRes[0]
+		lvgName = splitRes[1]
+	}
+
+	lvg, err := m.GetLocalVolumeGroupByName(ns, lvgName)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			m.cleanCacheForLocalVolumeGroup(lvgName)
@@ -384,9 +394,10 @@ func (m *manager) addLocalVolumeGroup(lvg *apisv1alpha1.LocalVolumeGroup) error 
 	for _, fnlr := range lvg.Finalizers {
 		if fnlr == volumeGroupFinalizer {
 			m.lock.Lock()
+			defer m.lock.Unlock()
 			for _, vol := range lvg.Spec.Volumes {
 				if len(vol.PersistentVolumeClaimName) > 0 {
-					m.pvcToVolumeGroups[namespacedName(lvg.Spec.Namespace, vol.PersistentVolumeClaimName)] = lvg.Name
+					m.pvcToVolumeGroups[namespacedName(lvg.Namespace, vol.PersistentVolumeClaimName)] = lvg.Name
 				}
 				if len(vol.LocalVolumeName) > 0 {
 					m.localVolumeToVolumeGroups[vol.LocalVolumeName] = lvg.Name
@@ -394,10 +405,9 @@ func (m *manager) addLocalVolumeGroup(lvg *apisv1alpha1.LocalVolumeGroup) error 
 			}
 			if len(lvg.Spec.Pods) > 0 {
 				for _, podName := range lvg.Spec.Pods {
-					m.podToVolumeGroups[namespacedName(lvg.Spec.Namespace, podName)] = lvg.Name
+					m.podToVolumeGroups[namespacedName(lvg.Namespace, podName)] = lvg.Name
 				}
 			}
-			m.lock.Unlock()
 			return nil
 		}
 	}
@@ -508,8 +518,9 @@ func (m *manager) addLocalVolume(lv *apisv1alpha1.LocalVolume) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	lvg, err := m.GetLocalVolumeGroupByName(lv.Spec.VolumeGroup)
+	lvg, err := m.GetLocalVolumeGroupByName(lv.Spec.PersistentVolumeClaimNamespace, lv.Spec.VolumeGroup)
 	if err != nil {
+		m.logger.WithFields(log.Fields{"namespace": lv.Spec.PersistentVolumeClaimNamespace}).WithError(err).Error("addLocalVolume GetLocalVolumeGroupByName err")
 		return err
 	}
 
@@ -521,7 +532,7 @@ func (m *manager) addLocalVolume(lv *apisv1alpha1.LocalVolume) error {
 			}
 			return nil
 		}
-		if vol.PersistentVolumeClaimName == lv.Spec.PersistentVolumeClaimName && lvg.Spec.Namespace == lv.Spec.PersistentVolumeClaimNamespace {
+		if vol.PersistentVolumeClaimName == lv.Spec.PersistentVolumeClaimName && lvg.Namespace == lv.Spec.PersistentVolumeClaimNamespace {
 			// localvolume is just created to serve PVC
 			lvg.Spec.Volumes[i].LocalVolumeName = lv.Name
 			m.localVolumeToVolumeGroups[lv.Name] = lv.Spec.VolumeGroup
@@ -535,12 +546,19 @@ func (m *manager) addLocalVolume(lv *apisv1alpha1.LocalVolume) error {
 
 func (m *manager) deleteLocalVolume(lvName string) error {
 	defer m.debug()
-
+	vol := &apisv1alpha1.LocalVolume{}
+	if err := m.apiClient.Get(context.TODO(), types.NamespacedName{Name: lvName}, vol); err != nil {
+		if !errors.IsNotFound(err) {
+			m.logger.WithFields(log.Fields{"volName": lvName, "error": err.Error()}).Error("Failed to query volume")
+			return err
+		}
+	}
 	lvgName, exists := m.localVolumeToVolumeGroups[lvName]
 	if !exists {
 		return nil
 	}
-	lvg, err := m.GetLocalVolumeGroupByName(lvgName)
+
+	lvg, err := m.GetLocalVolumeGroupByName(vol.Spec.PersistentVolumeClaimName, lvgName)
 	if err != nil {
 		return err
 	}
@@ -606,7 +624,7 @@ func (m *manager) deletePVC(namespace string, name string) error {
 	if !exists {
 		return nil
 	}
-	lvg, err := m.GetLocalVolumeGroupByName(lvgName)
+	lvg, err := m.GetLocalVolumeGroupByName(namespace, lvgName)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			m.cleanCacheForPVC(namespace, name)
@@ -618,7 +636,7 @@ func (m *manager) deletePVC(namespace string, name string) error {
 	modified := false
 	associatedVolumes := []apisv1alpha1.VolumeInfo{}
 	for i := range lvg.Spec.Volumes {
-		if lvg.Spec.Volumes[i].PersistentVolumeClaimName != name || lvg.Spec.Namespace != namespace {
+		if lvg.Spec.Volumes[i].PersistentVolumeClaimName != name || lvg.Namespace != namespace {
 			associatedVolumes = append(associatedVolumes, lvg.Spec.Volumes[i])
 			continue
 		}
@@ -675,7 +693,7 @@ func (m *manager) deletePod(namespace string, name string) error {
 		return nil
 	}
 
-	lvg, err := m.GetLocalVolumeGroupByName(lvgName)
+	lvg, err := m.GetLocalVolumeGroupByName(namespace, lvgName)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			delete(m.podToVolumeGroups, podKey)
@@ -683,7 +701,7 @@ func (m *manager) deletePod(namespace string, name string) error {
 		}
 		return err
 	}
-	if lvg.Spec.Namespace != namespace {
+	if lvg.Namespace != namespace {
 		delete(m.podToVolumeGroups, podKey)
 		return nil
 	}

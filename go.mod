@@ -4,10 +4,11 @@ go 1.17
 
 require (
 	github.com/container-storage-interface/spec v1.3.0
+	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.7.3
-	github.com/hwameistor/local-disk-manager v0.1.0
-	github.com/hwameistor/reliable-helper-system v0.0.6
+	github.com/hwameistor/local-disk-manager v0.1.6
+	github.com/hwameistor/reliable-helper-system v0.1.0
 	github.com/kubernetes-csi/csi-lib-utils v0.7.1
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.17.0
@@ -15,6 +16,7 @@ require (
 	github.com/soheilhy/cmux v0.1.4
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
+	github.com/wxnacy/wgo v1.0.4
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 	google.golang.org/grpc v1.27.0
 	k8s.io/api v0.18.6
@@ -61,7 +63,7 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.0.1 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
-	google.golang.org/genproto v0.0.0-20191220175831-5c49e3ecc1c1 // indirect
+	google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

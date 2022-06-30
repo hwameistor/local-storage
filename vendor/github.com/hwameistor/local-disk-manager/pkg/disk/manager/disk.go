@@ -1,23 +1,24 @@
 package manager
 
 import (
-	"github.com/hwameistor/local-disk-manager/pkg/utils"
 	"os"
+
+	"github.com/hwameistor/local-disk-manager/pkg/utils"
 )
 
 // DiskInfo
 type DiskInfo struct {
 	// DiskIdentify
-	DiskIdentify
+	DiskIdentify `json:"diskIdentify,omitempty"`
 
 	// Attribute
-	Attribute Attribute `json:"attribute"`
+	Attribute Attribute `json:"attribute,omitempty"`
 
 	// Partition
-	Partitions []PartitionInfo `json:"partition"`
+	Partitions []PartitionInfo `json:"partition,omitempty"`
 
 	// Raid
-	Raid RaidInfo `json:"raid"`
+	Raid RaidInfo `json:"raid,omitempty"`
 }
 
 // GenerateUUID

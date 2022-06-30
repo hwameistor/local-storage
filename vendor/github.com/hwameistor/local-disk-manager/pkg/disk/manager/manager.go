@@ -18,7 +18,7 @@ const (
 	EXIST   EventType = "exist"
 )
 
-// Event indicates the type of Mount event and the properties of the mounted disk
+// Event indicates the type of MountRawBlock event and the properties of the mounted disk
 type Event struct {
 	Type    EventType
 	DevPath string

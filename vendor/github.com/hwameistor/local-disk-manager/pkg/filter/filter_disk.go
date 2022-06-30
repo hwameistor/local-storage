@@ -34,10 +34,10 @@ func (ld *LocalDiskFilter) Init() *LocalDiskFilter {
 
 // Unclaimed
 func (ld *LocalDiskFilter) Unclaimed() *LocalDiskFilter {
-	if ld.LocalDisk.Status.State == ldmv1alpha1.LocalDiskClaimed {
-		ld.setResult(FALSE)
-	} else {
+	if ld.LocalDisk.Status.State == ldmv1alpha1.LocalDiskUnclaimed {
 		ld.setResult(TRUE)
+	} else {
+		ld.setResult(FALSE)
 	}
 
 	return ld

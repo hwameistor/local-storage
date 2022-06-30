@@ -12,16 +12,13 @@ spec:
   selector:
     app: nginx-local-storage-lvm-sts
 ---
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: nginx-local-storage-lvm-sts
 spec:
   serviceName: "nginx"
-  selector:
-    matchLabels:
-      app: nginx-local-storage-lvm-sts
-  replicas: 2
+  replicas: 3
   template:
     metadata:
       labels:
@@ -38,13 +35,7 @@ spec:
           volumeMounts:
             - name: www
               mountPath: /usr/share/nginx/html
-
-  volumeClaimTemplates:
-    - metadata:
-        name: www
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: local-storage-hdd-lvm-sts
-        resources:
-          requests:
-            storage: 1Gi
+      volumes:
+        - name: www
+          persistentVolumeClaim:
+            claimName: local-storage-pvc-lvm

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	ldm "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
-	"github.com/hwameistor/local-disk-manager/pkg/controller/localdisk"
+	localdisk2 "github.com/hwameistor/local-disk-manager/pkg/handler/localdisk"
 	lsapisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	apisv1alpha1 "github.com/hwameistor/reliable-helper-system/pkg/apis/hwameistor/v1alpha1"
 	"github.com/hwameistor/reliable-helper-system/pkg/utils"
@@ -879,7 +879,7 @@ func (m *manager) CheckLocalDiskInReplaceDiskTaskByUUID(nodeName, diskUuid strin
 // start with /dev/sdx
 func (m *manager) getDiskNameByDiskUUID(diskUUID, nodeName string) (string, error) {
 	var recorder record.EventRecorder
-	ldHandler := localdisk.NewLocalDiskHandler(m.apiClient, recorder)
+	ldHandler := localdisk2.NewLocalDiskHandler(m.apiClient, recorder)
 	ldList, err := ldHandler.ListLocalDisk()
 	if err != nil {
 		return "", err

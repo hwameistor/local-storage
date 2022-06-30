@@ -1,19 +1,19 @@
 package localdisk
 
 import (
-	"context"
-	"github.com/hwameistor/local-disk-manager/pkg/filter"
-	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/tools/record"
-	"k8s.io/client-go/tools/reference"
+	"github.com/hwameistor/local-disk-manager/pkg/handler/localdisk"
+	"github.com/hwameistor/local-disk-manager/pkg/utils"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	hwameistorv1alpha1 "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
-	ldmv1alpha1 "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
+	ldm "github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1"
+	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -42,6 +42,28 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	}
 }
 
+// withCurrentNode filter volume request for this node
+func withCurrentNode() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(event event.CreateEvent) bool {
+			disk, _ := event.Object.DeepCopyObject().(*ldm.LocalDisk)
+			return disk.Spec.NodeName == utils.GetNodeName()
+		},
+		DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
+			disk, _ := deleteEvent.Object.DeepCopyObject().(*ldm.LocalDisk)
+			return disk.Spec.NodeName == utils.GetNodeName()
+		},
+		UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+			disk, _ := updateEvent.ObjectNew.DeepCopyObject().(*ldm.LocalDisk)
+			return disk.Spec.NodeName == utils.GetNodeName()
+		},
+		GenericFunc: func(genericEvent event.GenericEvent) bool {
+			disk, _ := genericEvent.Object.DeepCopyObject().(*ldm.LocalDisk)
+			return disk.Spec.NodeName == utils.GetNodeName()
+		},
+	}
+}
+
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
@@ -51,7 +73,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource LocalDisk
-	err = c.Watch(&source.Kind{Type: &hwameistorv1alpha1.LocalDisk{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &ldm.LocalDisk{}}, &handler.EnqueueRequestForObject{}, withCurrentNode())
 	if err != nil {
 		return err
 	}
@@ -81,9 +103,12 @@ type ReconcileLocalDisk struct {
 func (r *ReconcileLocalDisk) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	log.Infof("Reconcile LocalDisk %s", req.Name)
 
-	ldHandler := NewLocalDiskHandler(r.Client, r.Recorder)
+	ldHandler := localdisk.NewLocalDiskHandler(r.Client, r.Recorder)
 	ld, err := ldHandler.GetLocalDisk(req.NamespacedName)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
+		}
 		log.WithError(err).Errorf("Failed to get localdisk")
 		return reconcile.Result{}, err
 	}
@@ -103,10 +128,10 @@ func (r *ReconcileLocalDisk) Reconcile(req reconcile.Request) (reconcile.Result,
 
 	// Update status
 	if ldHandler.ClaimRef() != nil && ldHandler.UnClaimed() {
-		ldHandler.SetupStatus(ldmv1alpha1.LocalDiskClaimed)
+		ldHandler.SetupStatus(ldm.LocalDiskClaimed)
 		if err := ldHandler.UpdateStatus(); err != nil {
-			r.Recorder.Eventf(&ldHandler.ld, v1.EventTypeWarning, "UpdateStatusFail", "Update status fail, due to error: %v", err)
-			log.WithError(err).Errorf("Update LocalDisk %v status fail", ldHandler.ld.Name)
+			r.Recorder.Eventf(&ldHandler.Ld, v1.EventTypeWarning, "UpdateStatusFail", "Update status fail, due to error: %v", err)
+			log.WithError(err).Errorf("Update LocalDisk %v status fail", ldHandler.Ld.Name)
 			return reconcile.Result{}, err
 		}
 	}
@@ -116,7 +141,7 @@ func (r *ReconcileLocalDisk) Reconcile(req reconcile.Request) (reconcile.Result,
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *hwameistorv1alpha1.LocalDisk) *corev1.Pod {
+func newPodForCR(cr *ldm.LocalDisk) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}
@@ -136,107 +161,4 @@ func newPodForCR(cr *hwameistorv1alpha1.LocalDisk) *corev1.Pod {
 			},
 		},
 	}
-}
-
-// LocalDiskHandler
-type LocalDiskHandler struct {
-	client.Client
-	record.EventRecorder
-	ld     ldmv1alpha1.LocalDisk
-	filter filter.LocalDiskFilter
-}
-
-// NewLocalDiskHandler
-func NewLocalDiskHandler(client client.Client, recorder record.EventRecorder) *LocalDiskHandler {
-	return &LocalDiskHandler{
-		Client:        client,
-		EventRecorder: recorder,
-	}
-}
-
-// GetLocalDisk
-func (ldHandler *LocalDiskHandler) GetLocalDisk(key client.ObjectKey) (*ldmv1alpha1.LocalDisk, error) {
-	ld := ldmv1alpha1.LocalDisk{}
-	if err := ldHandler.Get(context.Background(), key, &ld); err != nil {
-		if errors.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return &ld, nil
-}
-
-// ListLocalDisk
-func (ldHandler *LocalDiskHandler) ListLocalDisk() (*ldmv1alpha1.LocalDiskList, error) {
-	list := &ldmv1alpha1.LocalDiskList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "LocalDisk",
-			APIVersion: "v1alpha1",
-		},
-	}
-
-	err := ldHandler.List(context.TODO(), list)
-	return list, err
-}
-
-// For
-func (ldHandler *LocalDiskHandler) For(ld ldmv1alpha1.LocalDisk) *LocalDiskHandler {
-	ldHandler.ld = ld
-	ldHandler.filter = filter.NewLocalDiskFilter(ld)
-	return ldHandler
-}
-
-// Bounded
-func (ldHandler *LocalDiskHandler) UnClaimed() bool {
-	return !ldHandler.filter.
-		Init().
-		Unclaimed().
-		GetTotalResult()
-}
-
-// BoundTo assign disk to ldc
-func (ldHandler *LocalDiskHandler) BoundTo(ldc ldmv1alpha1.LocalDiskClaim) error {
-	ldcRef, err := reference.GetReference(nil, &ldc)
-	if err != nil {
-		return err
-	}
-
-	ldHandler.ld.Spec.ClaimRef = ldcRef
-	ldHandler.ld.Status.State = ldmv1alpha1.LocalDiskClaimed
-
-	if err = ldHandler.UpdateStatus(); err != nil {
-		return err
-	}
-	ldHandler.EventRecorder.Eventf(&ldHandler.ld, v1.EventTypeNormal, "LocalDiskClaimed", "Claimed by %v/%v", ldc.Namespace, ldc.Name)
-	return nil
-}
-
-// UpdateStatus
-func (ldHandler *LocalDiskHandler) SetupStatus(status ldmv1alpha1.LocalDiskClaimState) {
-	ldHandler.ld.Status.State = status
-}
-
-// UpdateStatus
-func (ldHandler *LocalDiskHandler) UpdateStatus() error {
-	return ldHandler.Update(context.Background(), &ldHandler.ld)
-}
-
-// ClaimRef
-func (ldHandler *LocalDiskHandler) ClaimRef() *v1.ObjectReference {
-	return ldHandler.ld.Spec.ClaimRef
-}
-
-// FilterDisk
-func (ldHandler *LocalDiskHandler) FilterDisk(ldc ldmv1alpha1.LocalDiskClaim) bool {
-	return ldHandler.filter.
-		Init().
-		Unclaimed().
-		NodeMatch(ldc.Spec.NodeName).
-		Capacity(ldc.Spec.Description.Capacity).
-		DiskType(ldc.Spec.Description.DiskType).
-		Unique(ldc.Spec.DiskRefs).
-		DevType().
-		NoPartition().
-		GetTotalResult()
 }

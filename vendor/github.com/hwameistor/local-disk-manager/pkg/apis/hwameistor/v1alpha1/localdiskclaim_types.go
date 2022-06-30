@@ -28,14 +28,15 @@ type LocalDiskClaimStatus struct {
 	Status DiskClaimStatus `json:"status,omitempty"`
 }
 
+// +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // LocalDiskClaim is the Schema for the localdiskclaims API
-//+kubebuilder:object:root=true
 //+kubebuilder:validation:Required
 //+kubebuilder:printcolumn:JSONPath=".spec.nodeName",name=NodeMatch,type=string
 //+kubebuilder:printcolumn:JSONPath=".status.status",name=Phase,type=string
-//+kubebuilder:resource:scope=Namespaced,shortName=ldc
+//+kubebuilder:resource:scope=Cluster,shortName=ldc
 type LocalDiskClaim struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -47,7 +48,6 @@ type LocalDiskClaim struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // LocalDiskClaimList contains a list of LocalDiskClaim
-//+kubebuilder:object:root=true
 type LocalDiskClaimList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

@@ -36,7 +36,6 @@ func ConvertShellOutputs(outputs string) []string {
 		start = index + 1
 	}
 
-	//不以换行符结尾
 	if !strings.HasSuffix(outputs, "\n") {
 		result = append(result, outputs[strings.LastIndex(outputs, "\n")+1:])
 	}

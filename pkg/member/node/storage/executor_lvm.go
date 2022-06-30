@@ -341,7 +341,7 @@ func (lvm *lvmExecutor) ExtendPools(availableLocalDisks []*apisv1alpha1.LocalDis
 		lvm.logger.WithError(err).Error("Failed to getExistingPVs.")
 		return err
 	}
-	lvm.logger.Debug("ExtendPools getExistingPVs existingPVMap = %v", existingPVMap)
+	//lvm.logger.Debug("ExtendPools getExistingPVs existingPVMap = %v", existingPVMap)
 
 	disksToBeExtends := make(map[string][]*apisv1alpha1.LocalDisk)
 	for _, disk := range availableLocalDisks {
@@ -359,7 +359,7 @@ func (lvm *lvmExecutor) ExtendPools(availableLocalDisks []*apisv1alpha1.LocalDis
 		disksToBeExtends[poolName] = append(disksToBeExtends[poolName], disk)
 	}
 
-	lvm.logger.Debug("ExtendPools disksToBeExtends = %v", disksToBeExtends)
+	//lvm.logger.Debug("ExtendPools disksToBeExtends = %v", disksToBeExtends)
 
 	for poolName, classifiedDisks := range disksToBeExtends {
 		if err := lvm.extendPool(poolName, classifiedDisks); err != nil {
@@ -455,9 +455,9 @@ func (lvm *lvmExecutor) getExistingPVs() (map[string]struct{}, error) {
 	}
 
 	for _, pvsReportRecords := range pvsReport.Records {
-		lvm.logger.Debug("Debug getExistingPVs pvsReportRecords.Records = %v", pvsReportRecords.Records)
+		//lvm.logger.Debug("Debug getExistingPVs pvsReportRecords.Records = %v", pvsReportRecords.Records)
 		for _, pvRecord := range pvsReportRecords.Records {
-			lvm.logger.Debug("Debug getExistingPVs pvRecord = %v, pvRecord.PoolName = %v", pvRecord, pvRecord.PoolName)
+			//lvm.logger.Debug("Debug getExistingPVs pvRecord = %v, pvRecord.PoolName = %v", pvRecord, pvRecord.PoolName)
 			if pvRecord.PoolName == "" {
 				existingPVsMap[pvRecord.Name] = struct{}{}
 			}

@@ -23,6 +23,9 @@ github.com/fsnotify/fsnotify
 # github.com/go-logr/logr v0.1.0
 ## explicit
 github.com/go-logr/logr
+# github.com/gofrs/uuid v4.2.0+incompatible
+## explicit
+github.com/gofrs/uuid
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
 github.com/gogo/protobuf/proto
@@ -67,17 +70,19 @@ github.com/gorilla/mux
 ## explicit; go 1.12
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
-# github.com/hwameistor/local-disk-manager v0.1.0
+# github.com/hwameistor/local-disk-manager v0.1.6
 ## explicit; go 1.17
 github.com/hwameistor/local-disk-manager/pkg/apis
 github.com/hwameistor/local-disk-manager/pkg/apis/hwameistor/v1alpha1
+github.com/hwameistor/local-disk-manager/pkg/builder/localdisk
 github.com/hwameistor/local-disk-manager/pkg/controller/localdisk
 github.com/hwameistor/local-disk-manager/pkg/disk/manager
 github.com/hwameistor/local-disk-manager/pkg/filter
+github.com/hwameistor/local-disk-manager/pkg/handler/localdisk
 github.com/hwameistor/local-disk-manager/pkg/localdisk
 github.com/hwameistor/local-disk-manager/pkg/utils
 github.com/hwameistor/local-disk-manager/pkg/utils/sys
-# github.com/hwameistor/reliable-helper-system v0.0.6
+# github.com/hwameistor/reliable-helper-system v0.1.0
 ## explicit; go 1.17
 github.com/hwameistor/reliable-helper-system/pkg/apis
 github.com/hwameistor/reliable-helper-system/pkg/apis/hwameistor/v1alpha1
@@ -169,6 +174,9 @@ github.com/spf13/pflag
 # github.com/stretchr/testify v1.6.1
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
+# github.com/wxnacy/wgo v1.0.4
+## explicit
+github.com/wxnacy/wgo/arrays
 # golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 ## explicit; go 1.11
 golang.org/x/crypto/ssh/terminal
@@ -231,7 +239,7 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20191220175831-5c49e3ecc1c1
+# google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24
 ## explicit; go 1.11
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.27.0 => google.golang.org/grpc v1.23.1

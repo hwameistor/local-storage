@@ -39,6 +39,7 @@ const (
 	OperationStateToBeAborted State = "ToBeAborted"
 	OperationStateAborting    State = "Cancelled"
 	OperationStateAborted     State = "Aborted"
+	OperationStateFailed      State = "Failed"
 
 	DiskStateAvailable State = "Available"
 	DiskStateInUse     State = "InUse"
@@ -208,10 +209,25 @@ type SystemConfig struct {
 	MaxHAVolumeCount int               `json:"maxVolumeCount"`
 }
 
+//go:generate mockgen -source=types.go -destination=../../../member/controller/volumegroup/manager_mock.go  -package=volumegroup
 type VolumeGroupManager interface {
 	Init(stopCh <-chan struct{})
 	ReconcileVolumeGroup(volGroup *LocalVolumeGroup)
-	GetLocalVolumeGroupByName(lvgName string) (*LocalVolumeGroup, error)
-	GetLocalVolumeGroupByLocalVolume(lvName string) (*LocalVolumeGroup, error)
+	GetLocalVolumeGroupByName(nameSpace, lvgName string) (*LocalVolumeGroup, error)
+	GetLocalVolumeGroupByLocalVolume(nameSpace, lvName string) (*LocalVolumeGroup, error)
 	GetLocalVolumeGroupByPVC(pvcName string, pvcNamespace string) (*LocalVolumeGroup, error)
+}
+
+// todo:
+// 1. structure/architecture optimize, plugin register, default plugins.
+// 		need so much more thinking!!!
+
+// VolumeScheduler interface
+////go:generate mockgen -source=types.go -destination=../../../member/controller/scheduler/scheduler_mock.go  -package=scheduler
+type VolumeScheduler interface {
+	Init()
+	// schedule will schedule all replicas, and generate a valid VolumeConfig
+	Allocate(vol *LocalVolume) (*VolumeConfig, error)
+
+	GetNodeCandidates(vols []*LocalVolume) []*LocalStorageNode
 }
