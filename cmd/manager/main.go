@@ -17,6 +17,7 @@ import (
 	"github.com/hwameistor/local-storage/pkg/member"
 	"github.com/hwameistor/local-storage/pkg/utils"
 	"github.com/hwameistor/local-storage/version"
+	isv1alpha1 "github.com/hwameistor/reliable-helper-system/pkg/apis"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -135,7 +136,12 @@ func main() {
 	}
 
 	if err := ldmv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.WithError(err).Error("Failed to setup scheme for all resources")
+		log.WithError(err).Error("Failed to setup scheme for ldm resources")
+		os.Exit(1)
+	}
+
+	if err := isv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.WithError(err).Error("Failed to setup scheme for reliable helper system resources")
 		os.Exit(1)
 	}
 

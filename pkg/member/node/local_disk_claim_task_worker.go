@@ -185,9 +185,11 @@ func (m *manager) listAllAvailableLocalDisksByLocalClaimDisk(ldc *ldmv1alpha1.Lo
 			continue
 		}
 
-		if ld.Spec.State == ldmv1alpha1.LocalDiskActive {
-			availableLocalDisks = append(availableLocalDisks, ld)
-		}
+		availableLocalDisks = append(availableLocalDisks, ld)
+
+		//if ld.Spec.State == ldmv1alpha1.LocalDiskActive {
+		//	availableLocalDisks = append(availableLocalDisks, ld)
+		//}
 	}
 	return availableLocalDisks, nil
 }
@@ -204,9 +206,12 @@ func (m *manager) listAllInUseLocalDisksByLocalClaimDisk(ldc *ldmv1alpha1.LocalD
 		if !ld.Spec.HasPartition {
 			continue
 		}
-		if ld.Spec.State == ldmv1alpha1.LocalDiskActive {
-			inUseLocalDisks = append(inUseLocalDisks, ld)
-		}
+
+		inUseLocalDisks = append(inUseLocalDisks, ld)
+		
+		//if ld.Spec.State == ldmv1alpha1.LocalDiskActive {
+		//	inUseLocalDisks = append(inUseLocalDisks, ld)
+		//}
 	}
 	return inUseLocalDisks, nil
 }

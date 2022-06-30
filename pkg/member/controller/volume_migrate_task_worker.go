@@ -3,12 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
-
+	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-
-	apisv1alpha1 "github.com/hwameistor/local-storage/pkg/apis/hwameistor/v1alpha1"
 )
 
 func (m *manager) startVolumeMigrateTaskWorker(stopCh <-chan struct{}) {
@@ -108,11 +106,30 @@ func (m *manager) volumeMigrateSubmit(migrate *apisv1alpha1.LocalVolumeMigrate) 
 
 	if vol.Status.State != apisv1alpha1.VolumeStateReady {
 		logCtx.WithFields(log.Fields{"volume": vol.Name, "state": vol.Status.State}).Error("Volume is not ready")
-		migrate.Status.Message = "Volume is not ready"
-		return m.apiClient.Status().Update(context.TODO(), migrate)
+		replicas, err := m.getReplicasForVolume(vol.Name)
+		if err != nil {
+			logCtx.Error("Failed to list VolumeReplica")
+			return err
+		}
+		if len(replicas) != int(vol.Spec.ReplicaNumber) {
+			logCtx.Info("Not all VolumeReplicas are created")
+			return fmt.Errorf("volume not ready")
+		}
+		var needMigrate bool
+		for _, replica := range replicas {
+			if replica.Status.State == apisv1alpha1.VolumeReplicaStateReady {
+				needMigrate = true
+				break
+			}
+		}
+		if needMigrate == false {
+			migrate.Status.Message = "Volume And VolumeReplica both not ready"
+			return m.apiClient.Status().Update(context.TODO(), migrate)
+		}
 	}
 
 	migrate.Status.ReplicaNumber = vol.Spec.ReplicaNumber
+
 	migrate.Status.State = apisv1alpha1.OperationStateSubmitted
 	return m.apiClient.Status().Update(context.TODO(), migrate)
 }
