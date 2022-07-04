@@ -286,14 +286,15 @@ var _ = ginkgo.Describe("test LocalVolumeGroupConvert ", ginkgo.Label("pr"), fun
 				logrus.Error("wrong number of lvg")
 			}
 			mylvg := lvgList.Items[0]
-			lvgc := &lsv1.LocalVolumeConvert{
+			lvgc := &lsv1.LocalVolumeGroupConvert{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "localvolumegroupconvert-1",
 					Namespace: "default",
 				},
-				Spec: lsv1.LocalVolumeConvertSpec{
-					VolumeName:    mylvg.Name,
-					ReplicaNumber: 2,
+
+				Spec: lsv1.LocalVolumeGroupConvertSpec{
+					LocalVolumeGroupName: mylvg.Name,
+					ReplicaNumber:        2,
 				},
 			}
 			err = client.Create(ctx, lvgc)
