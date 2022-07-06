@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-var _ = ginkgo.Describe("test LocalVolumeGroupConvert ", ginkgo.Label("pr"), func() {
+var _ = ginkgo.Describe("test LocalVolumeGroupConvert ", ginkgo.Label("test"), func() {
 
 	f := framework.NewDefaultFramework(apis.AddToScheme)
 	client := f.GetClient()
@@ -208,7 +208,7 @@ var _ = ginkgo.Describe("test LocalVolumeGroupConvert ", ginkgo.Label("pr"), fun
 		})
 
 	})
-	ginkgo.Context("Test the volume", func() {
+	ginkgo.Context("Test the volume & lvgc", func() {
 		ginkgo.It("check lvg", func() {
 			lvrList := &lsv1.LocalVolumeReplicaList{}
 			err := client.List(ctx, lvrList)
