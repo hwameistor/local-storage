@@ -52,11 +52,21 @@ func Test_manager_processVolumeMigrate(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
@@ -138,11 +148,21 @@ func Test_manager_volumeMigrateAbort(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
@@ -224,11 +244,21 @@ func Test_manager_volumeMigrateCleanup(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
@@ -310,11 +340,21 @@ func Test_manager_volumeMigrateInProgress(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
@@ -331,7 +371,7 @@ func Test_manager_volumeMigrateInProgress(t *testing.T) {
 			args: args{
 				migrate: lvm,
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -397,11 +437,21 @@ func Test_manager_volumeMigrateStart(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
@@ -484,11 +534,21 @@ func Test_manager_volumeMigrateSubmit(t *testing.T) {
 		t.Errorf("Create LocalVolume fail %v", err)
 	}
 
+	// Create LocalVolumeGroup
+	lvg := GenFakeLocalVolumeGroupObject()
+	lvg.Name = fakeLocalVolumeGroupName
+	lvg.Namespace = fakeNamespace
+	err = client.Create(context.Background(), lvg)
+	if err != nil {
+		t.Errorf("Create LocalVolumeGroup fail %v", err)
+	}
+
 	// Create LocalVolumeConvert
 	lvm := GenFakeLocalVolumeMigrateObject()
 	lvm.Name = fakeLocalVolumeMigrateName
+	lvm.Namespace = fakeNamespace
 	lvm.Spec.VolumeName = fakeLocalVolumeName
-	lvm.Spec.NodeName = fakeNodename
+	lvm.Spec.TargetNodesNames = fakeNodenames
 	err = client.Create(context.Background(), lvm)
 	if err != nil {
 		t.Errorf("Create LocalVolumeMigrate fail %v", err)
