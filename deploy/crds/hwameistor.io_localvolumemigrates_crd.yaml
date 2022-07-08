@@ -11,7 +11,7 @@ spec:
     shortNames:
     - lvmigrate
     singular: localvolumemigrate
-  scope: Cluster
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - description: Name of the volume to be migrated
@@ -57,12 +57,24 @@ spec:
               abort:
                 default: false
                 type: boolean
-              nodeName:
-                type: string
+              migrateAllVols:
+                default: false
+                type: boolean
+              sourceNodesNames:
+                description: source NodeNames
+                items:
+                  type: string
+                type: array
+              targetNodesNames:
+                description: target NodeNames
+                items:
+                  type: string
+                type: array
               volumeName:
                 type: string
             required:
-            - nodeName
+            - sourceNodesNames
+            - targetNodesNames
             - volumeName
             type: object
           status:
