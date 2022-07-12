@@ -1,18 +1,9 @@
 #! /usr/bin/env bash
-# simple scripts mng machine
-# link hosts
+
 export GOVC_INSECURE=1
 export GOVC_RESOURCE_POOL="e2e"
 export hosts="fupan-e2e-k8s-master fupan-e2e-k8s-node1 fupan-e2e-k8s-node2"
 export snapshot="e2etest"
-# for h in hosts; do govc vm.power -off -force $h; done
-# for h in hosts; do govc snapshot.revert -vm $h "机器配置2"; done
-# for h in hosts; do govc vm.power -on -force $h; done
-
-# govc vm.info $hosts[0].Power state
-# govc find . -type m -runtime.powerState poweredOn
-# govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
-# govc vm.info $hosts
 
 for h in $hosts; do
   if [[ `govc vm.info $h | grep poweredOn | wc -l` -eq 1 ]]; then
