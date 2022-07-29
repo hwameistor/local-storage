@@ -1,3 +1,7 @@
+[DEPRECATED] 
+
+The code has been move to https://github.com/hwameistor/hwameistor.
+
 # Local Storage Module
 
 [![codecov](https://codecov.io/gh/hwameistor/local-storage/branch/main/graph/badge.svg?token=AWRUI46FEX)](https://codecov.io/gh/hwameistor/local-storage)
